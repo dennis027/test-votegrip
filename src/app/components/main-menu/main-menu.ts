@@ -18,7 +18,7 @@ export class MainMenu implements OnInit {
       group: 'Overview',
       type: 'default',
       items: [
-        { name: 'Dashboard', route: '/dashboard', icon: 'grid' },
+        { name: 'Dashboard', route: '/main-menu/dashboard', icon: 'grid' },
       ]
     },
 
