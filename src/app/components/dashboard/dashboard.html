@@ -1,1 +1,245 @@
-<p>dashboard works!</p>
+<div class="dash-page">
+
+  <!-- ── TOP WELCOME BANNER ──────────────────────────────────────────────── -->
+  <div class="welcome-banner">
+    <div class="welcome-banner-bg"></div>
+    <div class="welcome-left">
+      <div class="welcome-avatar">{{ candidate.initials }}</div>
+      <div class="welcome-text">
+        <div class="welcome-greeting">Good morning 👋</div>
+        <h1 class="welcome-name">{{ candidate.name }}</h1>
+        <div class="welcome-meta">
+          <span class="meta-tag">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14.5C4.41 14.5 1.5 11.59 1.5 8S4.41 1.5 8 1.5 14.5 4.41 14.5 8 11.59 14.5 8 14.5z"/></svg>
+            {{ candidate.party }}
+          </span>
+          <span class="meta-tag">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a5 5 0 100 10A5 5 0 008 1zm0 1.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zM2 13.5a6 6 0 0112 0H2z"/></svg>
+            {{ candidate.constituency }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="welcome-right">
+      <div class="countdown-card">
+        <div class="countdown-days">{{ candidate.daysLeft }}</div>
+        <div class="countdown-label">days to<br>election</div>
+        <div class="countdown-date">{{ candidate.electionDate }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PHASE PROGRESS BAR ──────────────────────────────────────────────── -->
+  <div class="phase-bar-wrap">
+    <div class="phase-bar-header">
+      <div class="phase-bar-info">
+        <span class="phase-bar-dot"></span>
+        <span class="phase-bar-name">{{ phase.current }}</span>
+        <span class="phase-bar-label">{{ phase.label }}</span>
+      </div>
+      <span class="phase-bar-pct">{{ phase.progress }}% complete</span>
+    </div>
+    <div class="phase-track">
+      <div class="phase-fill" [style.width.%]="phase.progress"></div>
+      <div class="phase-steps">
+        <span class="phase-step phase-step-done">Pre-Election</span>
+        <span class="phase-step">Nomination</span>
+        <span class="phase-step">Election Day</span>
+        <span class="phase-step">Post-Election</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STAT CARDS ──────────────────────────────────────────────────────── -->
+  <div class="stats-row">
+    @for (s of stats; track s.label; let i = $index) {
+      <div class="stat-card" [class]="'stat-card-' + s.color" [style.animation-delay]="(i * 0.08) + 's'">
+        <div class="stat-card-top">
+          <div class="stat-icon-wrap" [class]="'stat-icon-' + s.color">
+            @if (s.icon === 'agents') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+            }
+            @if (s.icon === 'stations') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 3.636a1 1 0 010 1.414 7 7 0 000 9.9 1 1 0 11-1.414 1.414 9 9 0 010-12.728 1 1 0 011.414 0zm9.9 0a1 1 0 011.414 0 9 9 0 010 12.728 1 1 0 11-1.414-1.414 7 7 0 000-9.9 1 1 0 010-1.414zM7.879 6.464a1 1 0 010 1.414 3 3 0 000 4.243 1 1 0 11-1.415 1.414 5 5 0 010-7.07 1 1 0 011.415 0zm4.242 0a1 1 0 011.415 0 5 5 0 010 7.072 1 1 0 01-1.415-1.415 3 3 0 000-4.242 1 1 0 010-1.415zM10 9a1 1 0 011 1v.01a1 1 0 11-2 0V10a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            }
+            @if (s.icon === 'score') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            }
+            @if (s.icon === 'incidents') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            }
+          </div>
+          <div class="stat-trend" [class.trend-up]="s.trendUp" [class.trend-down]="!s.trendUp">
+            @if (s.trendUp) {
+              <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 2l4 4H7v4H5V6H2l4-4z"/></svg>
+            } @else {
+              <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 10L2 6h3V2h2v4h3l-4 4z"/></svg>
+            }
+            {{ s.trend }}
+          </div>
+        </div>
+        <div class="stat-value">{{ s.value }}</div>
+        <div class="stat-label">{{ s.label }}</div>
+        <div class="stat-sub">{{ s.sub }}</div>
+        <div class="stat-card-bar">
+          <div class="stat-card-bar-fill" [class]="'bar-fill-' + s.color"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── MAIN GRID ────────────────────────────────────────────────────────── -->
+  <div class="main-grid">
+
+    <!-- LEFT COL ──────────────────────────────────────────────────────────── -->
+    <div class="left-col">
+
+      <!-- Coverage donut card -->
+      <div class="card coverage-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-blue">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 3.636a1 1 0 010 1.414 7 7 0 000 9.9 1 1 0 11-1.414 1.414 9 9 0 010-12.728 1 1 0 011.414 0zm9.9 0a1 1 0 011.414 0 9 9 0 010 12.728 1 1 0 11-1.414-1.414 7 7 0 000-9.9 1 1 0 010-1.414zM7.879 6.464a1 1 0 010 1.414 3 3 0 000 4.243 1 1 0 11-1.415 1.414 5 5 0 010-7.07 1 1 0 011.415 0zm4.242 0a1 1 0 011.415 0 5 5 0 010 7.072 1 1 0 01-1.415-1.415 3 3 0 000-4.242 1 1 0 010-1.415zM10 9a1 1 0 011 1v.01a1 1 0 11-2 0V10a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            </div>
+            <h3 class="card-title">Station Coverage</h3>
+          </div>
+          <span class="card-badge card-badge-blue">301 total</span>
+        </div>
+
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#EEF1F5" stroke-width="14"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#2E6DA4" stroke-width="14"
+              stroke-dasharray="236 53" stroke-dashoffset="0"
+              stroke-linecap="round" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#F59E0B" stroke-width="14"
+              stroke-dasharray="36 253" stroke-dashoffset="-236"
+              transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#EF4444" stroke-width="14"
+              stroke-dasharray="17 272" stroke-dashoffset="-272"
+              transform="rotate(-90 60 60)"/>
+            <text x="60" y="55" text-anchor="middle" class="donut-num">82%</text>
+            <text x="60" y="68" text-anchor="middle" class="donut-sub">covered</text>
+          </svg>
+          <div class="donut-legend">
+            @for (d of coverageData; track d.label) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="d.color"></span>
+                <span class="legend-label">{{ d.label }}</span>
+                <span class="legend-val">{{ d.value }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card quick-actions-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-purple">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 14a4 4 0 00-8 0v1h8v-1zM6 14a4 4 0 00-1 .07V15H2v-1a4 4 0 014-4z"/></svg>
+            </div>
+            <h3 class="card-title">Quick Actions</h3>
+          </div>
+        </div>
+        <div class="qa-grid">
+          @for (a of quickActions; track a.label) {
+            <button class="qa-btn" [class]="'qa-btn-' + a.color">
+              @if (a.icon === 'chat') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/></svg>
+              }
+              @if (a.icon === 'users') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/></svg>
+              }
+              @if (a.icon === 'dollar') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
+              }
+              @if (a.icon === 'alert') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              }
+              <span>{{ a.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CENTRE COL ──────────────────────────────────────────────────────────── -->
+    <div class="centre-col">
+
+      <!-- Readiness by region -->
+      <div class="card readiness-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-green">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            </div>
+            <h3 class="card-title">Readiness by Region</h3>
+          </div>
+          <span class="card-action-link">View all</span>
+        </div>
+
+        <div class="readiness-list">
+          @for (r of readiness; track r.region; let i = $index) {
+            <div class="readiness-row" [style.animation-delay]="(i * 0.06) + 's'">
+              <div class="rr-left">
+                <div class="rr-region-dot" [class]="'rr-dot-' + r.color"></div>
+                <div class="rr-info">
+                  <span class="rr-name">{{ r.region }}</span>
+                  <span class="rr-agents">{{ r.agents }} agents</span>
+                </div>
+              </div>
+              <div class="rr-right">
+                <div class="rr-bar-track">
+                  <div class="rr-bar-fill" [class]="'rr-bar-' + r.color" [style.width.%]="r.score"></div>
+                </div>
+                <span class="rr-score" [class]="'rr-score-' + r.color">{{ r.score }}%</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COL ──────────────────────────────────────────────────────────── -->
+    <div class="right-col">
+
+      <!-- Recent activity -->
+      <div class="card activity-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-amber">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+            </div>
+            <h3 class="card-title">Recent Activity</h3>
+          </div>
+          <span class="live-pill">
+            <span class="live-dot-sm"></span> Live
+          </span>
+        </div>
+
+        <div class="activity-list">
+          @for (a of recentActivity; track a.message; let i = $index) {
+            <div class="activity-item" [style.animation-delay]="(i * 0.07) + 's'">
+              <div class="activity-dot-col">
+                <div class="act-dot" [class]="'act-dot-' + a.color"></div>
+                @if (i < recentActivity.length - 1) {
+                  <div class="act-line"></div>
+                }
+              </div>
+              <div class="activity-body">
+                <span class="act-msg">{{ a.message }}</span>
+                <span class="act-time">{{ a.time }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
