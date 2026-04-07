@@ -109,26 +109,34 @@
       <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
         <div class="field-group">
-          <label class="field-label" for="phone">Phone Number / Email</label>
-          <div class="field-wrap" [class.field-focused]="phoneFocused" [class.field-error]="submitted && loginForm.get('phone')?.invalid">
-            <span class="field-icon">
-              <svg viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-              </svg>
+          <label class="field-label" for="email"> Email</label>
+          <div class="field-wrap" [class.field-focused]="emailFocused" [class.field-error]="submitted && loginForm.get('email')?.invalid">
+            <div class="field-group">
+            <label class="field-label" for="email">Email or Phone</label>
+            <div class="field-wrap" [class.field-focused]="emailFocused" [class.field-error]="submitted && loginForm.get('identifier')?.invalid">
+              <span class="field-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+              </span>
+              <input
+                id="identifier"
+                type="text"
+                class="field-input"
+                placeholder="+254 7XX XXX XXX or email"
+                formControlName="email"
+                (focus)="emailFocused = true"
+                (blur)="emailFocused = false"
+                autocomplete="username"
+              />
+            </div>
+            <span class="field-error-msg" *ngIf="submitted && loginForm.get('email')?.invalid">
+              Please enter your email or phone
             </span>
-            <input
-              id="phone"
-              type="text"
-              class="field-input"
-              placeholder="+254 7XX XXX XXX or email"
-              formControlName="phone"
-              (focus)="phoneFocused = true"
-              (blur)="phoneFocused = false"
-              autocomplete="username"
-            />
           </div>
-          <span class="field-error-msg" *ngIf="submitted && loginForm.get('phone')?.invalid">
-            Please enter your phone number or email
+          </div>
+          <span class="field-error-msg" *ngIf="submitted && loginForm.get('email')?.invalid">
+            Please enter your or email
           </span>
         </div>
 

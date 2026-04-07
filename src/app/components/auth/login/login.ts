@@ -3,14 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-// import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth/auth';
+import { finalize } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule   // ← this fixes "Can't bind to formGroup"
+    ReactiveFormsModule   
   ],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
@@ -24,19 +26,20 @@ export class Login implements OnInit {
   submitted = false;
   loginError = '';
 
-  phoneFocused = false;
+  emailFocused = false;
   passwordFocused = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    // private authService: AuthService
+    private authService: AuthService,
+    
   ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      phone:    ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      email:    ['', [Validators.required]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
@@ -52,25 +55,45 @@ export class Login implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
+
   onSubmit(): void {
-    this.submitted = true;
-    this.loginError = '';
+  this.submitted = true;
+  this.loginError = '';
 
-    if (this.loginForm.invalid) return;
-
-    this.isLoading = true;
-
-    // Replace with your real auth call:
-    // this.authService.login(phone, password, this.selectedRole).subscribe(...)
-    setTimeout(() => {
-      this.isLoading = false;
-      const routes: Record<string, string> = {
-        candidate:   '/dashboard/candidate',
-        agent:       '/dashboard/agent',
-        coordinator: '/dashboard/coordinator'
-      };
-      this.router.navigate([routes[this.selectedRole]]);
-      // On error: this.loginError = 'Invalid credentials. Please try again.';
-    }, 1500);
+  if (this.loginForm.invalid) {
+    this.isLoading = false;
+    return;
   }
+
+  this.isLoading = true;
+
+  this.authService.login({
+    email: this.loginForm.value.email,
+    password: this.loginForm.value.password,
+    channel: 'email'
+  })
+  .pipe(
+    finalize(() => {
+      this.isLoading = false;
+    })
+  )
+  .subscribe({
+    next: () => {
+      
+      this.router.navigate(['main-menu/dashboard']);
+      console.log('Login successful');
+   
+      // this.toastr.success('Login successful!', 'Welcome Back');
+    },
+    error: (err) => {
+      console.error('Login error:', err);
+      this.loginError = 'Invalid credentials. Please try again.';
+      console.error('Login failed:', err);
+      // this.toastr.error('Login failed!', 'Error');
+
+    }
+  });
+}
+
+ 
 }
