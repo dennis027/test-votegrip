@@ -9,6 +9,13 @@ import { environment } from '../../../environments/environments';
 })
 export class AuthService {
   private loginAPI = `${environment.apiUrl}/${environment.apiVersion}/auth/login/`;
+  private verify2Fa = `${environment.apiUrl}/${environment.apiVersion}/auth/mfa/verify/`;
+  private resend2Fa = `${environment.apiUrl}/${environment.apiVersion}/auth/mfa/resend/`;
+  private refreshTokenUrl = `${environment.apiUrl}/${environment.apiVersion}/auth/token/refresh/`;
+  private profileUrl = `${environment.apiUrl}/${environment.apiVersion}/auth/me/`;
+  private changePasswordUrlInHouse = `${environment.apiUrl}/${environment.apiVersion}/auth/password/change/`;
+  private passwordResetRequesEmail = `${environment.apiUrl}/${environment.apiVersion}/auth/password/reset/request/`;
+  private passwordResetConfirm = `${environment.apiUrl}/${environment.apiVersion}/auth/password/reset/confirm/`;
   private logoutUrl = `${environment.apiUrl}/${environment.apiVersion}/auth/logout/`;
 
   constructor(
@@ -16,17 +23,20 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  /**
-   * LOGIN
-   * No Authorization header
-   * No custom headers
-   */
   login(payload: { email: string; password: string; channel: string }): Observable<any> {
     return this.http.post<any>(this.loginAPI, payload, {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
       })
-    });
+    }).pipe(
+      tap((response) => {
+        const pendingToken = response?.data?.pending_token;
+
+        if (pendingToken) {
+          localStorage.setItem('pending_token', pendingToken);
+        }
+      })
+    );
   }
 
   getAccessToken(): string | null {
