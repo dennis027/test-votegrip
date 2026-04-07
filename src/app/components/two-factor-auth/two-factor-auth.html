@@ -1,0 +1,44 @@
+<div class="otp-page">
+  <div class="otp-card">
+    <div class="otp-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17 8V7a5 5 0 10-10 0v1H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-9a2 2 0 00-2-2h-2zm-8 0V7a3 3 0 116 0v1H9zm3 8a2 2 0 110-4 2 2 0 010 4z"/>
+      </svg>
+    </div>
+
+    <h1 class="otp-title">Identity Verification</h1>
+    <p class="otp-subtitle">Enter the code sent to your device.</p>
+  
+    <div class="otp-inputs" (paste)="onPaste($event)">
+    @for (digit of otp(); track $index) {
+        <input
+        #otpInput
+        type="text"
+        inputmode="numeric"
+        class="otp-box"
+        [value]="digit" 
+        (input)="onInput($event, $index)"
+        (keydown)="onKeyDown($event, $index)"
+        autocomplete="one-time-code"
+        />
+    }
+    </div>
+
+    <div class="otp-error" [style.visibility]="errorMessage() ? 'visible' : 'hidden'">
+      {{ errorMessage() }}
+    </div>
+
+    <button class="verify-btn" (click)="verifyCode()" [disabled]="isSubmitting() || code().length < 6">
+      @if (!isSubmitting()) {
+        <span>Verify & Proceed</span>
+      } @else {
+        <span class="loader"></span>
+      }
+    </button>
+
+    <div class="otp-footer">
+      Didn’t receive the code?
+      <button class="resend-btn" (click)="resendCode()">Resend Code</button>
+    </div>
+  </div>
+</div>
