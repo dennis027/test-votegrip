@@ -1,10 +1,11 @@
-import { Component, signal, viewChildren, ElementRef, computed } from '@angular/core';
+import { Component, signal, viewChildren, ElementRef, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth/auth';
 
 @Component({
   selector: 'app-two-factor-auth',
   standalone: true,
-  // REMOVE FormsModule from here
   imports: [CommonModule], 
   templateUrl: './two-factor-auth.html',
   styleUrl: './two-factor-auth.css',
@@ -13,6 +14,10 @@ export class TwoFactorAuth {
   otp = signal<string[]>(['', '', '', '', '', '']);
   isSubmitting = signal(false);
   errorMessage = signal('');
+
+  private authService = inject(AuthService);
+  private route = inject(Router);
+
 
   // Use the #otpInput reference from the HTML
   inputs = viewChildren<ElementRef<HTMLInputElement>>('otpInput');
@@ -114,4 +119,25 @@ export class TwoFactorAuth {
     this.inputs().forEach(i => i.nativeElement.value = '');
     this.inputs()[0].nativeElement.focus();
   }
+
+post2FAVerification() {
+  if (!this.code() || this.code().length !== 6) {
+    this.errorMessage.set('Please enter the 6-digit verification code.');
+    return;
+  }
+
+  this.errorMessage.set('');
+
+  this.authService.twoFactorVerify(this.code()).subscribe({
+    next: () => {
+      this.route.navigate(['main-menu/dashboard']);
+    },
+    error: (err) => {
+      console.error('2FA verification failed:', err);
+      this.errorMessage.set(
+        err?.error?.message || 'Invalid code. Please try again.'
+      );
+    }
+  });
+}
 }
