@@ -80,7 +80,7 @@ export class Login implements OnInit {
   .subscribe({
     next: () => {
       
-      this.router.navigate(['main-menu/dashboard']);
+      this.router.navigate(['two-factor-auth']);
       console.log('Login successful');
    
       // this.toastr.success('Login successful!', 'Welcome Back');
