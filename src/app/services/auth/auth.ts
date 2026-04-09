@@ -1,7 +1,7 @@
 // auth.service.ts
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError, tap } from 'rxjs';
+import { Observable, throwError, tap, finalize } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environments';
 
@@ -43,12 +43,16 @@ export class AuthService {
     if (this.isBrowser()) localStorage.removeItem(key);
   }
 
-  private clearSession(): void {
-    this.removeItem('access_token');
-    this.removeItem('refresh_token');
-    this.removeItem('pending_token');
-  }
-
+clearSession(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      // Specify the exact keys you want to destroy
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('pending_token');
+      
+      console.log('Session tokens cleared.');
+    }
+ }
   // Public token accessors
   getAccessToken(): string | null  { return this.getItem('access_token'); }
   getRefreshToken(): string | null { return this.getItem('refresh_token'); }
@@ -204,18 +208,19 @@ twoFactorVerify(otpCode: string): Observable<any> {
   // ── Logout ─────────────────────────────────────────────────────────────────
   // Fix: logout uses access_token (not pending_token) for Authorization
 
-  logout(): Observable<any> {
-    const refreshToken = this.getRefreshToken();
+logout(): Observable<any> {
+  const refreshToken = this.getRefreshToken();
+  
+  // OPTION: Clear locally immediately so the UI updates instantly
+  // this.clearSession(); 
 
-    return this.http.post<any>(
-      this.logoutUrl,
-      { refresh: refreshToken },
-      { headers: this.authHeaders() }  // uses access_token — correct
-    ).pipe(
-      tap({
-        next:  () => this.clearSession(),
-        error: () => this.clearSession()  // clear even if server returns an error
-      })
-    );
-  }
+  return this.http.post<any>(
+    this.logoutUrl,
+    { refresh: refreshToken },
+    { headers: this.authHeaders() }
+  ).pipe(
+    // finalize runs whether the call succeeds OR fails
+    finalize(() => this.clearSession()) 
+  );
+}
 }

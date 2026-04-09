@@ -1,7 +1,9 @@
 // main-menu.ts
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../services/auth/auth';
 
 @Component({
   selector: 'app-main-menu',
@@ -10,6 +12,29 @@ import { Router, RouterModule } from '@angular/router';
   styleUrl: './main-menu.css',
 })
 export class MainMenu implements OnInit {
+
+  private snackBar = inject(MatSnackBar);
+  private authService = inject(AuthService);
+
+
+  // ── Snack helpers ─────────────────────────────────────────────────────────
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
+  }
 
   links = [
 
@@ -116,6 +141,9 @@ export class MainMenu implements OnInit {
   }
 
   logOut(): void {
+    this.authService.logout();
+    this.showSuccess('Logged out successfully');
+
     this.router.navigate(['/login']);
   }
 }
