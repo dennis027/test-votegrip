@@ -74,6 +74,10 @@ export class AuthService {
   // Login does NOT need Authorization — server returns pending_token on success
 
   login(payload: { email: string; password: string; channel: string }): Observable<any> {
+  // clear local storage before login to avoid stale tokens from previous sessions
+  this.removeItem('access_token');
+  this.removeItem('refresh_token');
+  this.removeItem('pending_token');
     return this.http.post<any>(this.loginAPI, payload, {
       headers: this.jsonHeaders()
     }).pipe(
