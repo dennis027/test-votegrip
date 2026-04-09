@@ -1,39 +1,31 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent
-} from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, inject } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth/auth';
+
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip auth for requests that explicitly ask to skip it
-    if (req.headers.has('X-Skip-Auth')) {
-      const cleanReq = req.clone({
-        headers: req.headers.delete('X-Skip-Auth')
-      });
-      return next.handle(cleanReq);
-    }
+    const token = this.authService.getAccessToken();
 
-    // Only attach token in browser
-    const token = isPlatformBrowser(this.platformId)
-      ? localStorage.getItem('access_token')
-      : null;
+    const cloned = token
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : req;
 
-    if (token) {
-      req = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
+    return next.handle(cloned).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // Token invalid or expired
+          this.authService.logout();
+          this.router.navigateByUrl('/login', { replaceUrl: true });
         }
-      });
-    }
-
-    return next.handle(req);
+        return throwError(() => error);
+      })
+    );
   }
 }
