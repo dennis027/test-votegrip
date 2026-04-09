@@ -1,11 +1,11 @@
 // login.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth/auth';
 import { finalize } from 'rxjs/operators';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -28,11 +28,13 @@ export class Login implements OnInit {
 
   emailFocused = false;
   passwordFocused = false;
+  private snackBar = inject(MatSnackBar);
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
+    
     
   ) {}
 
@@ -40,6 +42,24 @@ export class Login implements OnInit {
     this.loginForm = this.fb.group({
       email:    ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+  }
+
+   showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+  }
+
+  showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
     });
   }
 
@@ -83,13 +103,13 @@ export class Login implements OnInit {
       this.router.navigate(['two-factor-auth']);
       console.log('Login successful');
    
-      // this.toastr.success('Login successful!', 'Welcome Back');
+      this.showSuccess('Login successful! Please enter the 2FA code sent to your email.');
     },
     error: (err) => {
       console.error('Login error:', err);
       this.loginError = 'Invalid credentials. Please try again.';
       console.error('Login failed:', err);
-      // this.toastr.error('Login failed!', 'Error');
+      this.showError('Login failed. Please check your credentials and try again.');
 
     }
   });

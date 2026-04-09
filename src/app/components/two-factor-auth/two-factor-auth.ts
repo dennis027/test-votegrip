@@ -2,6 +2,7 @@ import { Component, signal, viewChildren, ElementRef, computed, inject } from '@
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-two-factor-auth',
@@ -16,7 +17,27 @@ export class TwoFactorAuth {
   errorMessage = signal('');
 
   private authService = inject(AuthService);
+
   private route = inject(Router);
+
+  private snackBar = inject(MatSnackBar);
+  showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+  }
+
+  showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+  }
 
 
   // Use the #otpInput reference from the HTML
@@ -131,12 +152,14 @@ post2FAVerification() {
   this.authService.twoFactorVerify(this.code()).subscribe({
     next: () => {
       this.route.navigate(['main-menu/dashboard']);
+      this.showSuccess('2FA verification successful! Welcome to the dashboard.');
     },
     error: (err) => {
       console.error('2FA verification failed:', err);
       this.errorMessage.set(
         err?.error?.message || 'Invalid code. Please try again.'
       );
+      this.showError('2FA verification failed. Please check the code and try again.');
     }
   });
 }
