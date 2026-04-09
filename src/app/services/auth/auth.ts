@@ -176,6 +176,7 @@ twoFactorVerify(otpCode: string): Observable<any> {
   // ── Change Password ────────────────────────────────────────────────────────
 
   changePassword(payload: {
+    
     old_password: string;
     new_password: string;
     confirm_password: string;
@@ -188,6 +189,15 @@ twoFactorVerify(otpCode: string): Observable<any> {
   // ── Password Reset Request (email) ─────────────────────────────────────────
 
   requestPasswordReset(payload: { email: string }): Observable<any> {
+
+    if (isPlatformBrowser(this.platformId)) {
+      // Specify the exact keys you want to destroy
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('pending_token');
+      
+    }
+
     return this.http.post<any>(this.passwordResetRequest, payload, {
       headers: this.jsonHeaders()
     });
@@ -196,10 +206,21 @@ twoFactorVerify(otpCode: string): Observable<any> {
   // ── Password Reset Confirm ─────────────────────────────────────────────────
 
   confirmPasswordReset(payload: {
-    token: string;
+    
+    email: any;
+    otp_code: string;
     new_password: string;
-    confirm_password: string;
+    confirm_new_password: string;
   }): Observable<any> {
+
+    if (isPlatformBrowser(this.platformId)) {
+      // Specify the exact keys you want to destroy
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('pending_token');
+      
+      console.log('Session tokens cleared.');
+    }
     return this.http.post<any>(this.passwordResetConfirm, payload, {
       headers: this.jsonHeaders()
     });
