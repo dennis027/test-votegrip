@@ -1,6 +1,9 @@
 // dashboard.ts
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../services/auth/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,6 +13,57 @@ import { CommonModule } from '@angular/common';
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
+
+  private snackBar = inject(MatSnackBar);
+  private cdr      = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+
+  // name variable to hold the user's name
+  name = 'Candidate';
+
+
+  ngOnInit(): void {
+    // Simulate loading data
+    setTimeout(() => {
+      this.authService.getProfile().subscribe({
+        next: (profile) => {
+          console.log('User profile:', profile.data.full_name);
+          this.showSuccess('Welcome back, ' + profile.data.full_name + '!');
+          this.name = profile.data.full_name;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Failed to load profile:', err);
+          this.showError('Failed to load user profile. Please try again later.');
+
+          if (err.status === 401) {
+            this.showError('Session expired. Please log in again.');
+            this.router.navigate(['/login']);
+          }
+        }
+      });
+    }, 1000);
+  }
+
+  showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+  }
+
+  showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+  }
 
   candidate = {
     name: 'James Kariuki',
