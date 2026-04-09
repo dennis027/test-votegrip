@@ -130,12 +130,12 @@ twoFactorVerify(otpCode: string): Observable<any> {
       return throwError(() => new Error('No pending token. Please log in first.'));
     }
 
-    const headers = new HttpHeaders({
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${pendingToken}`
-    });
+    const payload = {
+      pending_token: pendingToken,
+      channel: "email"
+    };
 
-    return this.http.post<any>(this.resend2FaUrl, {}, { headers });
+    return this.http.post<any>(this.resend2FaUrl, payload);
   }
 
   // ── Refresh Access Token ───────────────────────────────────────────────────

@@ -136,9 +136,15 @@ export class TwoFactorAuth {
   }
 
   resendCode() {
-    this.otp.set(['', '', '', '', '', '']);
-    this.inputs().forEach(i => i.nativeElement.value = '');
-    this.inputs()[0].nativeElement.focus();
+    this.authService.resend2FA().subscribe({
+      next: () => {
+        this.showSuccess('A new 2FA code has been sent to your email.');
+      },
+      error: (err) => {
+        console.error('Failed to resend 2FA code:', err);
+        this.showError('Failed to resend code. Please try again later.');
+      }
+    });
   }
 
 post2FAVerification() {
