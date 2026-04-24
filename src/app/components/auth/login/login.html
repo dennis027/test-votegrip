@@ -77,6 +77,14 @@
   <main class="form-panel">
     <div class="form-inner">
 
+      <!-- Back to home -->
+      <a class="back-link" href="/">
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+        </svg>
+        Back to Home
+      </a>
+
       <div class="form-header">
         <div class="form-eyebrow">
           <span class="eyebrow-dot"></span>
@@ -139,7 +147,7 @@
         <div class="field-group">
           <div class="field-label-row">
             <label class="field-label" for="password">Password</label>
-            <a class="forgot-link" href="#">Forgot password?</a>
+            <a class="forgot-link" href="/request-reset-password">Forgot password?</a>
           </div>
           <div class="field-wrap"
                [class.field-focused]="passwordFocused"

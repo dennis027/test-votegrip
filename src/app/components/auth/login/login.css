@@ -133,17 +133,18 @@
   display: flex;
   align-items: center;
   background: var(--gray-light);
-  border: 1.5px solid var(--border);
+  border: 2px solid #000;   
   border-radius: 10px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   min-height: 48px;           /* ensures input is never clipped */
   overflow: visible;          /* was accidentally hidden in nested div version */
   width: 100%;
+  color: black;
 }
 .field-wrap.field-focused {
   border-color: var(--blue-accent);
   background: var(--white);
-  box-shadow: 0 0 0 3px rgba(74,144,217,0.12);
+  box-shadow: 0 0 0 3px rgba(217, 155, 74, 0.12);
 }
 .field-wrap.field-error { border-color: #EF4444; background: #FFF5F5; }
 
@@ -197,6 +198,16 @@
 .submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,58,92,0.35); }
 .submit-btn:active:not(:disabled){ transform: translateY(0); }
 .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* Back link */
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 600;
+  color: var(--text-muted); text-decoration: none; margin-bottom: 1.8rem;
+  transition: color 0.15s;
+}
+.back-link:hover { color: var(--blue-mid); }
+.back-link svg { width: 14px; height: 14px; fill: currentColor; }
 .submit-text   { display: flex; align-items: center; justify-content: center; gap: 0.6rem; }
 .submit-text svg { width: 16px; height: 16px; fill: var(--white); }
 .submit-loader { display: flex; align-items: center; justify-content: center; gap: 0.6rem; }
