@@ -32,10 +32,12 @@
         <a class="nav-link" href="#">How It Works</a>
         <a class="nav-link" href="#">Pricing</a>
         <a class="nav-link" href="#">Contact</a>
+        <a class="nav-link" href="/request-credentials">Request Credentials</a>
       </div>
       <div class="nav-actions">
         <a class="nav-btn-ghost" href="/login">Sign In</a>
         <a class="nav-btn-solid" href="/login">Get Started</a>
+        <a class="nav-btn-ghost" href="/request-credentials">Request Credentials</a>
       </div>
       <!-- Mobile hamburger -->
       <button class="nav-hamburger" (click)="toggleMenu()" [class.open]="menuOpen">
@@ -48,6 +50,7 @@
       <a class="nav-mobile-link" href="#" (click)="closeMenu()">How It Works</a>
       <a class="nav-mobile-link" href="#" (click)="closeMenu()">Pricing</a>
       <a class="nav-mobile-link" href="#" (click)="closeMenu()">Contact</a>
+      <a class="nav-mobile-link" href="/request-credentials" (click)="closeMenu()">Request Credentials</a>
       <a class="nav-mobile-btn" href="/login" (click)="closeMenu()">Sign In to Dashboard</a>
     </div>
   </nav>
