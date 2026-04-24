@@ -7,6 +7,7 @@ import { TwoFactorAuth } from './components/two-factor-auth/two-factor-auth';
 import { AuthGuard } from './guards/auth-guard';
 import { RequestResetPassword } from './components/auth/request-reset-password/request-reset-password';
 import { ResetPassword } from './components/auth/reset-password/reset-password';
+import { RequestCredentials } from './components/request-credentials/request-credentials';
 
 export const routes: Routes = [
   {path:'',component:Home},
@@ -14,9 +15,10 @@ export const routes: Routes = [
   {path: 'two-factor-auth', component: TwoFactorAuth },
   { path: 'request-reset-password', component: RequestResetPassword },
   { path: 'reset-password', component: ResetPassword },
+  { path: 'request-credentials', component: RequestCredentials },
 
   {path:'main-menu', canActivate: [AuthGuard], component:MainMenu,children:[
       {path:'dashboard',component:Dashboard },
   ]},
   {path: '', redirectTo: 'home', pathMatch: 'full' } 
-];
+];  
