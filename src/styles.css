@@ -11,3 +11,19 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 2px solid #000;  /* 🔥 black border */
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 12px;
+}
