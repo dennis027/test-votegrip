@@ -8,6 +8,9 @@ import { AuthGuard } from './guards/auth-guard';
 import { RequestResetPassword } from './components/auth/request-reset-password/request-reset-password';
 import { ResetPassword } from './components/auth/reset-password/reset-password';
 import { RequestCredentials } from './components/request-credentials/request-credentials';
+import { AdminDashboard } from './components/admin/admin-dashboard/admin-dashboard';
+import { AdminMenu } from './components/admin/admin-menu/admin-menu';
+import { ManageCandidates } from './components/admin/manage-candidates/manage-candidates';
 
 export const routes: Routes = [
   {path:'',component:Home},
@@ -20,5 +23,12 @@ export const routes: Routes = [
   {path:'main-menu', canActivate: [AuthGuard], component:MainMenu,children:[
       {path:'dashboard',component:Dashboard },
   ]},
+
+  {path:'admin-menu', canActivate: [AuthGuard], component:AdminMenu,children:[
+      {path:'admin-dashboard',component:AdminDashboard },
+      {path:"manage-candidates", component:ManageCandidates},
+  ]},
+
+
   {path: '', redirectTo: 'home', pathMatch: 'full' } 
 ];  

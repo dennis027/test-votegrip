@@ -1,0 +1,143 @@
+:root {
+  --blue-dark: #1A3A5C;
+  --blue-mid: #2E6DA4;
+  --blue-light: #EBF4FF;
+  --gray-bg: #F4F6F9;
+  --gray-light: #EEF1F5;
+  --gray-mid: #C9D3DE;
+  --text-primary: #1A1A2E;
+  --text-muted: #64748B;
+  --green: #1A6B3A;
+  --red-soft: #FEE2E2;
+  --red-mid: #EF4444;
+  --white: #FFFFFF;
+}
+
+.manage-candidates-page {
+  padding: 24px;
+  background: var(--gray-bg);
+  min-height: calc(100vh - 80px);
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: var(--blue-dark);
+}
+
+.page-copy {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.table-panel {
+  background: var(--white);
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.candidate-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.candidate-table th,
+.candidate-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--gray-light);
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.candidate-table th {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font-weight: 700;
+}
+
+.candidate-table tr:last-child td {
+  border-bottom: none;
+}
+
+.candidate-table tr:nth-child(even) {
+  background: #fbfbff;
+}
+
+.candidate-table td {
+  color: var(--text-primary);
+}
+
+.candidate-table td .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: rgba(26, 106, 60, 0.12);
+  color: var(--green);
+}
+
+.status-inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--red-mid);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  min-width: 96px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.action-buttons button:hover {
+  transform: translateY(-1px);
+}
+
+.btn-approve {
+  background: var(--green);
+  color: var(--white);
+}
+
+.btn-reject {
+  background: var(--red-mid);
+  color: var(--white);
+}
+
+.loading-state,
+.empty-state {
+  padding: 28px 20px;
+  border-radius: 18px;
+  background: var(--white);
+  color: var(--text-muted);
+  font-size: 1rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(18, 52, 93, 0.06);
+}
+
+.mat-paginator {
+  padding: 16px 18px;
+  background: var(--gray-bg);
+}

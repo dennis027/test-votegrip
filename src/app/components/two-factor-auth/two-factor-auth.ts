@@ -1,4 +1,4 @@
-import { Component, signal, viewChildren, ElementRef, computed, inject } from '@angular/core';
+import { Component, signal, viewChildren, ElementRef, computed, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth';
@@ -11,10 +11,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   templateUrl: './two-factor-auth.html',
   styleUrl: './two-factor-auth.css',
 })
-export class TwoFactorAuth {
+export class TwoFactorAuth implements OnInit, OnDestroy {
   otp = signal<string[]>(['', '', '', '', '', '']);
   isSubmitting = signal(false);
   errorMessage = signal('');
+
+  destroyed = false;
 
   private authService = inject(AuthService);
 
@@ -22,21 +24,36 @@ export class TwoFactorAuth {
 
   private snackBar = inject(MatSnackBar);
   showSuccess(message: string) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar'],
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    if (!this.destroyed) {
+      this.snackBar.open(message, 'Close', {
+        duration: 3000,
+        panelClass: ['success-snackbar'],
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
+    }
   }
 
   showError(message: string) {
-    this.snackBar.open(message, 'Close', {
-      duration: 4000,
-      panelClass: ['error-snackbar'],
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    if (!this.destroyed) {
+      this.snackBar.open(message, 'Close', {
+        duration: 4000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
+    }
+  }
+
+  ngOnInit() {
+    const pendingKey = localStorage.getItem('pending_token');
+    if (!pendingKey?.trim()) {
+      this.route.navigate(['login']);
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroyed = true;
   }
 
 
@@ -156,8 +173,10 @@ post2FAVerification() {
   this.errorMessage.set('');
 
   this.authService.twoFactorVerify(this.code()).subscribe({
-    next: () => {
-      this.route.navigate(['main-menu/dashboard']);
+    next: (res) => {
+      const role = res.data.user.role.name;
+      const dashboardRoute = role === 'admin' ? 'admin-menu/admin-dashboard' : 'main-menu/dashboard';
+      this.route.navigate([dashboardRoute]);
       this.showSuccess('2FA verification successful! Welcome to the dashboard.');
     },
     error: (err) => {

@@ -1,0 +1,205 @@
+<div class="admin-dash-page">
+
+  <!-- ── TOP WELCOME BANNER ──────────────────────────────────────────────── -->
+  <div class="welcome-banner">
+    <div class="welcome-banner-bg"></div>
+    <div class="welcome-left">
+      <div class="welcome-avatar">AD</div>
+      <div class="welcome-text">
+        <div class="welcome-greeting">Welcome back 👋</div>
+        <h1 class="welcome-name">Admin Dashboard</h1>
+        <div class="welcome-meta">
+          <span class="meta-tag">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14.5C4.41 14.5 1.5 11.59 1.5 8S4.41 1.5 8 1.5 14.5 4.41 14.5 8 11.59 14.5 8 14.5z"/></svg>
+            System Administrator
+          </span>
+          <span class="meta-tag">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a5 5 0 100 10A5 5 0 008 1zm0 1.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zM2 13.5a6 6 0 0112 0H2z"/></svg>
+            VoteGrip Platform
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="welcome-right">
+      <div class="system-status-card">
+        <div class="status-indicator status-healthy">
+          <span class="status-dot"></span>
+          <span class="status-text">All Systems Operational</span>
+        </div>
+        <div class="uptime-display">
+          <div class="uptime-value">99.9%</div>
+          <div class="uptime-label">Uptime</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN STAT CARDS ─────────────────────────────────────────────────── -->
+  <div class="stats-row">
+    @for (s of adminStats; track s.label; let i = $index) {
+      <div class="stat-card" [class]="'stat-card-' + s.color" [style.animation-delay]="(i * 0.08) + 's'">
+        <div class="stat-card-top">
+          <div class="stat-icon-wrap" [class]="'stat-icon-' + s.color">
+            @if (s.icon === 'users') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+            }
+            @if (s.icon === 'server') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 10-2 0 1 1 0 012 0zM2 13a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 1a1 1 0 10-2 0 1 1 0 012 0z" clip-rule="evenodd"/></svg>
+            }
+            @if (s.icon === 'activity') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
+            }
+            @if (s.icon === 'alert') {
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            }
+          </div>
+          <div class="stat-trend" [class.trend-up]="s.trendUp" [class.trend-down]="!s.trendUp">
+            @if (s.trendUp) {
+              <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 2l4 4H7v4H5V6H2l4-4z"/></svg>
+            } @else {
+              <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 10L2 6h3V2h2v4h3l-4 4z"/></svg>
+            }
+            {{ s.trend }}
+          </div>
+        </div>
+        <div class="stat-value">{{ s.value }}</div>
+        <div class="stat-label">{{ s.label }}</div>
+        <div class="stat-sub">{{ s.sub }}</div>
+        <div class="stat-card-bar">
+          <div class="stat-card-bar-fill" [class]="'bar-fill-' + s.color"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── MAIN GRID ────────────────────────────────────────────────────────── -->
+  <div class="main-grid">
+
+    <!-- LEFT COL ──────────────────────────────────────────────────────────── -->
+    <div class="left-col">
+
+      <!-- User Activity Chart -->
+      <div class="card activity-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-blue">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
+            </div>
+            <h3 class="card-title">User Activity</h3>
+          </div>
+          <span class="card-badge card-badge-blue">Last 30 days</span>
+        </div>
+
+        <div class="activity-chart">
+          <div class="chart-bars">
+            @for (bar of activityData; track bar.day) {
+              <div class="chart-bar" [style.height.%]="bar.height">
+                <div class="bar-fill" [style.height.%]="bar.value"></div>
+                <span class="bar-label">{{ bar.day }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- System Health -->
+      <div class="card health-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-green">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            </div>
+            <h3 class="card-title">System Health</h3>
+          </div>
+          <span class="card-badge card-badge-green">All Good</span>
+        </div>
+
+        <div class="health-metrics">
+          @for (metric of healthMetrics; track metric.label) {
+            <div class="health-item">
+              <div class="health-label">{{ metric.label }}</div>
+              <div class="health-bar">
+                <div class="health-fill" [style.width.%]="metric.value" [class]="'health-' + metric.status"></div>
+              </div>
+              <div class="health-value">{{ metric.value }}%</div>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COL ─────────────────────────────────────────────────────────── -->
+    <div class="right-col">
+
+      <!-- Recent Activities -->
+      <div class="card activities-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-purple">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+            </div>
+            <h3 class="card-title">Recent Activities</h3>
+          </div>
+        </div>
+
+        <div class="activities-list">
+          @for (activity of recentActivities; track activity.id) {
+            <div class="activity-item">
+              <div class="activity-icon" [class]="'activity-' + activity.type">
+                @if (activity.type === 'user') {
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                }
+                @if (activity.type === 'system') {
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 10-2 0 1 1 0 012 0zM2 13a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 1a1 1 0 10-2 0 1 1 0 012 0z" clip-rule="evenodd"/></svg>
+                }
+                @if (activity.type === 'alert') {
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                }
+              </div>
+              <div class="activity-content">
+                <div class="activity-message">{{ activity.message }}</div>
+                <div class="activity-time">{{ activity.time }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Quick Admin Actions -->
+      <div class="card admin-actions-card">
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <div class="card-title-icon card-title-icon-orange">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 14a4 4 0 00-8 0v1h8v-1zM6 14a4 4 0 00-1 .07V15H2v-1a4 4 0 014-4z"/></svg>
+            </div>
+            <h3 class="card-title">Admin Actions</h3>
+          </div>
+        </div>
+
+        <div class="admin-actions-grid">
+          @for (action of adminActions; track action.label) {
+            <button class="admin-action-btn" [class]="'action-btn-' + action.color" (click)="performAction(action.id)">
+              @if (action.icon === 'user-plus') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1z"/></svg>
+              }
+              @if (action.icon === 'settings') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c1.56.379 2.98-1.56 2.98-2.98a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+              }
+              @if (action.icon === 'shield') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              }
+              @if (action.icon === 'database') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 12v2a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1zm0-4v2a1 1 0 001 1h12a1 1 0 001-1V8a1 1 0 00-1-1H4a1 1 0 00-1 1zm0-4v2a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H4a1 1 0 00-1 1z"/></svg>
+              }
+              <span>{{ action.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

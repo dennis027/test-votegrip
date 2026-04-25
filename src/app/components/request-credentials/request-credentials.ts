@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // The new optimized dep
 import { finalize } from 'rxjs/operators';
-import { Users } from '../../services/users';
+import { UsersService } from '../../services/users';
 
 @Component({
   selector: 'app-request-credentials',
@@ -28,7 +28,7 @@ export class RequestCredentials implements OnInit {
 
   // Services
   private fb = inject(FormBuilder);
-  private usersService = inject(Users);
+  private usersService = inject(UsersService);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef); // Required for clean cleanup

@@ -1,0 +1,177 @@
+<!-- Mobile navbar -->
+<nav class="mobile-navbar">
+  <button class="menu-toggle" (click)="toggleSidebar()">
+    <span class="hamburger-icon" [class.open]="isSidebarActive">
+      <span></span><span></span><span></span>
+    </span>
+  </button>
+  <div class="mobile-brand">
+    <div class="mobile-logo-icon">
+      <svg viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="20" stroke="white" stroke-width="1.5" stroke-opacity="0.4"/>
+        <circle cx="24" cy="24" r="5" fill="white" fill-opacity="0.9"/>
+        <circle cx="24" cy="11" r="2.5" fill="white" fill-opacity="0.6"/>
+        <circle cx="34" cy="17" r="2.5" fill="white" fill-opacity="0.6"/>
+        <circle cx="34" cy="30" r="2.5" fill="white" fill-opacity="0.6"/>
+        <circle cx="24" cy="37" r="2.5" fill="white" fill-opacity="0.6"/>
+        <circle cx="14" cy="30" r="2.5" fill="white" fill-opacity="0.6"/>
+        <circle cx="14" cy="17" r="2.5" fill="white" fill-opacity="0.6"/>
+        <line x1="24" y1="24" x2="24" y2="11" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+        <line x1="24" y1="24" x2="34" y2="17" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+        <line x1="24" y1="24" x2="34" y2="30" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+        <line x1="24" y1="24" x2="24" y2="37" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+        <line x1="24" y1="24" x2="14" y2="30" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+        <line x1="24" y1="24" x2="14" y2="17" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+      </svg>
+    </div>
+    <span class="mobile-brand-name">VoteGrip</span>
+  </div>
+  <div class="mobile-live">
+    <span class="live-dot"></span>
+    <span>Live</span>
+  </div>
+</nav>
+
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" [class.active]="isSidebarActive" (click)="closeSidebar()"></div>
+
+<div class="dashboard-wrapper">
+
+  <!-- ── SIDEBAR ────────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar" [class.active]="isSidebarActive">
+
+    <!-- Logo -->
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="white" stroke-width="1.5" stroke-opacity="0.3"/>
+            <circle cx="24" cy="24" r="5" fill="white" fill-opacity="0.9"/>
+            <circle cx="24" cy="11" r="2.5" fill="white" fill-opacity="0.6"/>
+            <circle cx="34" cy="17" r="2.5" fill="white" fill-opacity="0.6"/>
+            <circle cx="34" cy="30" r="2.5" fill="white" fill-opacity="0.6"/>
+            <circle cx="24" cy="37" r="2.5" fill="white" fill-opacity="0.6"/>
+            <circle cx="14" cy="30" r="2.5" fill="white" fill-opacity="0.6"/>
+            <circle cx="14" cy="17" r="2.5" fill="white" fill-opacity="0.6"/>
+            <line x1="24" y1="24" x2="24" y2="11" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+            <line x1="24" y1="24" x2="34" y2="17" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+            <line x1="24" y1="24" x2="34" y2="30" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+            <line x1="24" y1="24" x2="24" y2="37" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+            <line x1="24" y1="24" x2="14" y2="30" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+            <line x1="24" y1="24" x2="14" y2="17" stroke="white" stroke-width="1" stroke-opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-name">VoteGrip</span>
+          <span class="logo-sub">Admin Portal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase indicator -->
+    <div class="phase-indicator">
+      <span class="phase-live-dot"></span>
+      <div class="phase-info">
+        <span class="phase-label">Election Day</span>
+        <span class="phase-date">9 Aug 2027</span>
+      </div>
+    </div>
+
+    <!-- Grouped nav -->
+    <nav class="nav-menu">
+      @for (group of links; track group.group) {
+        <div class="nav-group" [class.nav-group-nomination]="group.type === 'nomination'">
+
+          <!-- Nomination group header -->
+          @if (group.type === 'nomination') {
+            <div class="nom-group-header">
+              <div class="nom-header-left">
+                <span class="nom-live-dot"></span>
+                <span class="nom-group-label">{{ group.group }}</span>
+              </div>
+              <span class="nom-badge">LIVE</span>
+            </div>
+          }
+
+          <!-- Default group label -->
+          @if (group.type !== 'nomination') {
+            <span class="nav-group-label">{{ group.group }}</span>
+          }
+          @for (item of group.items; track item.route) {
+            <a
+              class="nav-link"
+              [class.nav-link-nomination]="group.type === 'nomination'"
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: false }"
+              (click)="onNavLinkClick()">
+
+              <!-- Overview -->
+              @if (item.icon === 'grid') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+              }
+              @if (item.icon === 'map') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"/></svg>
+              }
+              @if (item.icon === 'users') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+              }
+              @if (item.icon === 'checklist') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              }
+              @if (item.icon === 'chat') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/></svg>
+              }
+              @if (item.icon === 'flag') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd"/></svg>
+              }
+              @if (item.icon === 'dollar') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
+              }
+              @if (item.icon === 'signal') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+              }
+              @if (item.icon === 'chart') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/></svg>
+              }
+              @if (item.icon === 'alert') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              }
+              @if (item.icon === 'file') {
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+              }
+
+              <span>{{ item.name }}</span>
+
+              @if (item.icon === 'signal' && group.type !== 'nomination') {
+                <span class="nav-live-badge">LIVE</span>
+              }
+            </a>
+          }
+        </div>
+      }
+    </nav>
+
+    <!-- User + Logout -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">JK</div>
+        <div class="user-info">
+          <span class="user-name">James Kariuki</span>
+          <span class="user-role">Parliamentary Candidate</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logOut()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+        Sign Out
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN CONTENT ───────────────────────────────────────────────────── -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>
