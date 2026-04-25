@@ -84,20 +84,27 @@
 
           <!-- Nomination group header -->
           @if (group.type === 'nomination') {
-            <div class="nom-group-header">
+            <div class="nom-group-header" (click)="toggleGroup(group.group)">
               <div class="nom-header-left">
                 <span class="nom-live-dot"></span>
                 <span class="nom-group-label">{{ group.group }}</span>
               </div>
               <span class="nom-badge">LIVE</span>
+              <svg class="expand-icon" [class.rotated]="isGroupOpen(group.group)" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
             </div>
           }
 
-          <!-- Default group label -->
+          <!-- Default group header -->
           @if (group.type !== 'nomination') {
-            <span class="nav-group-label">{{ group.group }}</span>
+            <div class="group-header" (click)="toggleGroup(group.group)">
+              <span class="nav-group-label">{{ group.group }}</span>
+              <svg class="expand-icon" [class.rotated]="isGroupOpen(group.group)" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </div>
           }
-          @for (item of group.items; track item.route) {
+
+          <!-- Items -->
+          @if (isGroupOpen(group.group)) {
+            @for (item of group.items; track item.route) {
             <a
               class="nav-link"
               [class.nav-link-nomination]="group.type === 'nomination'"
@@ -147,6 +154,7 @@
                 <span class="nav-live-badge">LIVE</span>
               }
             </a>
+          }
           }
         </div>
       }

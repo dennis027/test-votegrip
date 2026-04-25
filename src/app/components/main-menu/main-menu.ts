@@ -1,5 +1,5 @@
 // main-menu.ts
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -35,6 +35,8 @@ export class MainMenu implements OnInit {
       verticalPosition: 'top',
     });
   }
+
+  openGroup = signal<string | null>(null);
 
   links = [
 
@@ -101,6 +103,14 @@ export class MainMenu implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {}
+
+  toggleGroup(groupName: string): void {
+    this.openGroup.set(this.openGroup() === groupName ? null : groupName);
+  }
+
+  isGroupOpen(groupName: string): boolean {
+    return this.openGroup() === groupName;
+  }
 
   toggleSidebar(): void {
     this.isSidebarActive = !this.isSidebarActive;
