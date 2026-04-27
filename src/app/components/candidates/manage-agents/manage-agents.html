@@ -1,0 +1,140 @@
+<div class="manage-candidates-page">
+  <header class="page-header">
+    <div>
+      <h2>Manage Candidates</h2>
+      <p class="page-copy">Review new candidate registrations and approve or reject pending accounts.</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="callAPI()">
+      + Add Agent
+    </button>
+  </header>
+
+  <section class="table-panel mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="candidate-table">
+
+      <ng-container matColumnDef="first_name">
+        <th mat-header-cell *matHeaderCellDef> First Name </th>
+        <td mat-cell *matCellDef="let candidate"> {{candidate.first_name}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="last_name">
+        <th mat-header-cell *matHeaderCellDef> Last Name </th>
+        <td mat-cell *matCellDef="let candidate"> {{candidate.last_name}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let candidate"> {{candidate.email}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="phone">
+        <th mat-header-cell *matHeaderCellDef> Phone </th>
+        <td mat-cell *matCellDef="let candidate"> {{candidate.phone}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let candidate">
+          <div class="action-buttons">
+          
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="5" style="padding: 2rem; text-align: center;">
+          @if (isLoading()) {
+            <span class="loader-dark"></span>
+          } @else {
+            No pending candidates found.
+          }
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                   showFirstLastButtons
+                   aria-label="Select page of candidates">
+    </mat-paginator>
+  </section>
+</div>
+
+
+
+<ng-template #callAPIDialog>
+  <div class="dialog-container">
+    <h3>Add New Agent</h3>
+    <form [formGroup]="form" (ngSubmit)="addAgent()">
+    <div class="container">
+      <div class="row">
+        <div class="col-6">
+          <div class="input-group">
+            <label>First Name</label>
+            <input type="text" formControlName="first_name" placeholder="Enter first name">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="input-group">
+            <label>Last Name</label>
+            <input type="text" formControlName="last_name" placeholder="Enter last name">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+
+        </div>
+        <div class="col-6">
+          
+        </div>
+      </div>
+    </div>
+  
+
+
+
+
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="agent@example.com"
+              [class.is-invalid]="form.get('email')?.hasError('serverError')">
+        
+        @if (form.get('email')?.hasError('serverError')) {
+          <small class="error-text">
+            {{ form.get('email')?.getError('serverError') }}
+          </small>
+        }
+      </div>
+
+      <div class="input-group">
+        <label>Phone</label>
+        <input type="tel" formControlName="phone" placeholder="07XXXXXXXX"
+              [class.is-invalid]="form.get('phone')?.hasError('serverError')">
+        
+        @if (form.get('phone')?.hasError('serverError')) {
+          <small class="error-text">
+            {{ form.get('phone')?.getError('serverError') }}
+          </small>
+        }
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" mat-button (click)="closeDialog()">Cancel</button>
+        <button type="submit" mat-flat-button color="primary" [disabled]="isSubmitting() || form.invalid">
+          @if (isSubmitting()) { 
+            <span class="loader"></span> 
+          } @else { 
+            Save Agent 
+          }
+        </button>
+      </div>
+    </form>
+</div>
+    <mat-dialog-actions align="end">
+   
+    </mat-dialog-actions>
+</ng-template>
