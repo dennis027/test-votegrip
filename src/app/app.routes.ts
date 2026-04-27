@@ -11,6 +11,8 @@ import { RequestCredentials } from './components/request-credentials/request-cre
 import { AdminDashboard } from './components/admin/admin-dashboard/admin-dashboard';
 import { AdminMenu } from './components/admin/admin-menu/admin-menu';
 import { ManageCandidates } from './components/admin/manage-candidates/manage-candidates';
+import { ManageAgents } from './components/candidates/manage-agents/manage-agents';
+import { ManageMobilizers } from './components/candidates/manage-mobilizers/manage-mobilizers';
 
 export const routes: Routes = [
   {path:'',component:Home},
@@ -22,11 +24,14 @@ export const routes: Routes = [
 
   {path:'main-menu', canActivate: [AuthGuard], component:MainMenu,children:[
       {path:'dashboard',component:Dashboard },
+      {path:"manage-agents", component:ManageAgents},
+      {path:"manage-mobilizers", component:ManageMobilizers}, 
   ]},
 
   {path:'admin-menu', canActivate: [AuthGuard], component:AdminMenu,children:[
       {path:'admin-dashboard',component:AdminDashboard },
       {path:"manage-candidates", component:ManageCandidates},
+
   ]},
 
 
