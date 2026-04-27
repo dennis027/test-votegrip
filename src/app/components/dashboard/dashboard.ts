@@ -1,12 +1,12 @@
 // dashboard.ts
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth/auth';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-dashboard',  
   standalone: true,
   imports: [CommonModule],
   templateUrl: './dashboard.html',
@@ -18,6 +18,7 @@ export class Dashboard {
   private cdr      = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
 
   // name variable to hold the user's name
@@ -26,6 +27,8 @@ export class Dashboard {
 
   ngOnInit(): void {
     // Simulate loading data
+
+  if (isPlatformBrowser(this.platformId)) {
     setTimeout(() => {
       this.authService.getProfile().subscribe({
         next: (profile) => {
@@ -45,6 +48,8 @@ export class Dashboard {
         }
       });
     }, 1000);
+
+  }
   }
 
   showSuccess(message: string) {
