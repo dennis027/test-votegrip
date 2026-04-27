@@ -56,12 +56,12 @@ export class MainMenu implements OnInit {
       group: 'Pre-Election',
       type: 'default',
       items: [
-        { name: 'Campaign Setup',  route: '/dashboard/campaign',   icon: 'map' },
-        { name: 'Agents',          route: '/dashboard/agents',     icon: 'users' },
-        { name: 'Readiness',       route: '/dashboard/readiness',  icon: 'checklist' },
-        { name: 'Communication',   route: '/dashboard/messages',   icon: 'chat' },
-        { name: 'Field Intel',     route: '/dashboard/intel',      icon: 'flag' },
-        { name: 'Finance',         route: '/dashboard/finance',    icon: 'dollar' },
+        { name: 'Manage Agents',  route: '/main-menu/manage-agents',   icon: 'map' },
+        { name: 'Manage Mobilizers',route: '/main-menu/manage-mobilizers',     icon: 'users' },
+        { name: 'Readiness',       route: '/main-menu/readiness',  icon: 'checklist' },
+        { name: 'Communication',   route: '/main-menu/messages',   icon: 'chat' },
+        { name: 'Field Intel',     route: '/main-menu/intel',      icon: 'flag' },
+        { name: 'Finance',         route: '/main-menu/finance',    icon: 'dollar' },
       ]
     },
 
