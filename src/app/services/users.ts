@@ -21,16 +21,16 @@ export class UsersService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-requestLoginCred(payload: {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-}): Observable<any> {
-  return this.http.post<any>(this.requestLoginCredentials, payload, {
-    headers: { 'No-Auth': 'true' } 
-  });
-}
+
+  requestLoginCred(payload: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone:string;
+  }): Observable<any> {
+    return this.http.post<any>(this.requestLoginCredentials, payload);
+  }
+
 
   getUsersList(type:any, candidate_id:any): Observable<any> {
     const url = `${this.usersApi}type=${type}&candidate_id=${candidate_id}`;
