@@ -22,5 +22,5 @@ export const AuthGuard: CanActivateFn = (route, state) => {
   }
 
   // Redirect to login if no token
-  return router.createUrlTree(['/login']);
+  return router.createUrlTree(['login']);
 };

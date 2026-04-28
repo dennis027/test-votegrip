@@ -246,7 +246,7 @@ export class ResetPassword implements OnInit {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
   goToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['login']);
   }
 
   backToRequest(): void {

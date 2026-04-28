@@ -53,7 +53,7 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
           this.showError('Failed to load candidates. Please try again later.');
           if (error.status === 401) {
             this.showError('Session expired. Please log in again.');
-            this.route.navigate(['/login']);
+            this.route.navigate(['login']);
           }
         }
       });

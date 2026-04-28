@@ -80,7 +80,7 @@ userForm!: FormGroup;
       },
       error: () => {
         this.showError('Session expired. Please login again.');
-        this.route.navigate(['/login']);
+        this.route.navigate(['login']);
       }
     });
   }

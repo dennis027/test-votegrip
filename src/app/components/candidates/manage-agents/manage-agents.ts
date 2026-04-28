@@ -104,7 +104,7 @@ export class ManageAgents implements OnInit {
       },
       error: () => {
         this.showError('Failed to load profile information. Please login again.');
-        this.route.navigate(['/login']);
+        this.route.navigate(['login']);
       }
     });
   }
@@ -142,7 +142,7 @@ getUserAgents() {
 
         this.showError(displayMessage);
 
-        if (error.status === 401) this.route.navigate(['/login']);
+        if (error.status === 401) this.route.navigate(['login']);
       }
     });
 }

@@ -154,6 +154,6 @@ export class MainMenu implements OnInit {
     this.authService.logout();
     this.showSuccess('Logged out successfully');
 
-    this.router.navigate(['/login']);
+    this.router.navigate(['login']);
   }
 }

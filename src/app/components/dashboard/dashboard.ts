@@ -43,7 +43,7 @@ export class Dashboard {
 
           if (err.status === 401) {
             this.showError('Session expired. Please log in again.');
-            this.router.navigate(['/login']);
+            this.router.navigate(['login']);
           }
         }
       });
