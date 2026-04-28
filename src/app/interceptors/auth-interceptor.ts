@@ -10,7 +10,16 @@ export class AuthInterceptor implements HttpInterceptor {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  
+
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  if (req.headers.has('No-Auth')) {
+    const cleanReq = req.clone({
+      headers: req.headers.delete('No-Auth')
+    });
+    return next.handle(cleanReq);
+  }
+
     const token = this.authService.getAccessToken();
 
     const cloned = token

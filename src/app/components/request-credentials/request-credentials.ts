@@ -89,13 +89,15 @@ export class RequestCredentials implements OnInit {
       .subscribe({
         next: () => {
           this.done = true;
-          this.showSuccess('Credentials request submitted! Check your email.');
+          this.showSuccess('Credentials request submitted! Check  your email after some time.');
+          this.loading = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
           this.submitted = false;
           const msg = err?.error?.message || 'Request failed. Please try again.';
           this.showError(msg);
+          this.loading = false;
           this.cdr.detectChanges();
         },
       });
