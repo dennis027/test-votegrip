@@ -28,6 +28,16 @@
   margin-bottom: 20px;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-field {
+  width: 260px;
+}
+
 .page-header h2 {
   margin: 0;
   font-size: 1.75rem;

@@ -96,6 +96,21 @@ export class ManageAgents implements OnInit {
       this.loadCandidates();
         this.getProfile()
     }
+    // Configure filter to search by full name or phone
+    this.dataSource.filterPredicate = (data: Candidate, filter: string) => {
+      const f = filter.trim().toLowerCase();
+      const name = ((data.first_name || '') + ' ' + (data.last_name || '')).toLowerCase();
+      const phone = (data.phone || '').toString().toLowerCase();
+      return name.includes(f) || phone.includes(f);
+    };
+  }
+
+  applyFilter(value: string) {
+    const filterValue = (value || '').trim().toLowerCase();
+    this.dataSource.filter = filterValue;
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   getProfile() {

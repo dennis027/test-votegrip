@@ -4,9 +4,15 @@
       <h2>Manage Agents</h2>
       <p class="page-copy">View, add, and manage your field agents from one organized list.</p>
     </div>
-    <button mat-flat-button color="primary" (click)="openAddAgentDialog()">
-      + Add Agent
-    </button>
+    <div class="header-controls">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput placeholder="Name or phone" (input)="applyFilter($any($event.target).value)" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="openAddAgentDialog()">
+        + Add Agent
+      </button>
+    </div>
   </header>
 
   <section class="table-panel mat-elevation-z8">
