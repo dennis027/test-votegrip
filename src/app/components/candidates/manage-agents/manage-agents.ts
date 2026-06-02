@@ -10,6 +10,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 
 // Services & RxJS
@@ -31,14 +33,16 @@ export interface Candidate {
   selector: 'app-manage-agents',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    MatTableModule, 
-    MatPaginatorModule, 
-    MatButtonModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatButtonModule,
     MatSnackBarModule,
     MatDialogModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   templateUrl: './manage-agents.html',
   styleUrl: './manage-agents.css',
@@ -78,7 +82,6 @@ export class ManageAgents implements OnInit {
   }
 
   @ViewChild('addAgentTemp') addAgentTemp!: TemplateRef<any>;
-   @ViewChild('callAPIDialog') callAPIDialog!: TemplateRef<any>;
 
   form: FormGroup = this.fb.group({
     first_name: ['', [Validators.required]],
@@ -148,9 +151,9 @@ getUserAgents() {
 }
 
   openAddAgentDialog() {
-    // this.form.reset();
+    this.form.reset();
     this.activeDialog = this.dialog.open(this.addAgentTemp, {
-      width: '450px',
+      width: '520px',
       disableClose: true // Prevents accidental closing during submit
     });
   }
@@ -216,21 +219,6 @@ addAgent() {
     });
   }
 
-  callAPI() {
-        let dialogRef = this.dialog.open(this.callAPIDialog);
-        dialogRef.afterClosed().subscribe(result => {
-            // Note: If the user clicks outside the dialog or presses the escape key, there'll be no result
-            if (result !== undefined) {
-                if (result === 'yes') {
-                    // TODO: Replace the following line with your code.
-                    console.log('User clicked yes.');
-                } else if (result === 'no') {
-                    // TODO: Replace the following line with your code.
-                    console.log('User clicked no.');
-                }
-            }
-        })
-    }
 
 
 

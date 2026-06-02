@@ -13,6 +13,7 @@
   --white: #FFFFFF;
 }
 
+.manage-agents-page,
 .manage-candidates-page {
   padding: 24px;
   background: var(--gray-bg);
@@ -46,38 +47,38 @@
   overflow: hidden;
 }
 
-.candidate-table {
+.agent-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.candidate-table th,
-.candidate-table td {
+.agent-table th,
+.agent-table td {
   padding: 16px 18px;
   border-bottom: 1px solid var(--gray-light);
   text-align: left;
   font-size: 0.95rem;
 }
 
-.candidate-table th {
+.agent-table th {
   background: var(--blue-light);
   color: var(--blue-dark);
   font-weight: 700;
 }
 
-.candidate-table tr:last-child td {
+.agent-table tr:last-child td {
   border-bottom: none;
 }
 
-.candidate-table tr:nth-child(even) {
+.agent-table tr:nth-child(even) {
   background: #fbfbff;
 }
 
-.candidate-table td {
+.agent-table td {
   color: var(--text-primary);
 }
 
-.candidate-table td .status-badge {
+.agent-table td .status-badge {
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.7rem;
@@ -145,37 +146,115 @@
 /* Keep your existing variables and styles... */
 
 .dialog-container {
-  padding: 1.5rem;
+  padding: 1.8rem;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgba(15, 45, 90, 0.12);
 }
 
 .dialog-container h3 {
   margin-top: 0;
+  margin-bottom: 1.25rem;
   color: var(--blue-dark);
+  font-size: 1.3rem;
+}
+
+.dialog-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 2rem;
+  gap: 12px;
+  margin-top: 1.75rem;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.dialog-container mat-form-field {
+  width: 100%;
+}
+
+.dialog-container .mat-form-field-appearance-outline .mat-form-field-outline {
+  border-radius: 14px;
 }
 
 .input-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .input-group label {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--blue-dark);
 }
 
 .input-group input {
   width: 100%;
-  padding: 10px;
+  padding: 14px 16px;
   border: 1px solid var(--gray-mid);
-  border-radius: 8px;
+  border-radius: 14px;
+  background: #fdfdff;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.input-group input::placeholder {
+  color: #9ca3af;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--blue-mid);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(46, 109, 164, 0.1);
+}
+
+.input-group input.is-invalid {
+  border-color: var(--red-mid);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.error-text {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--red-mid);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    width: 100%;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
 }
 
 .loader, .loader-dark {
