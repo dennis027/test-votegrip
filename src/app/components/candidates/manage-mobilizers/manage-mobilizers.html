@@ -1,13 +1,26 @@
-<div class="form-container">
-    <section class="table-section">
-        <h2>Manage Mobilizers</h2>
-        <button mat-raised-button color="primary" (click)="addUpdateDialC()">Add Mobilizer</button>
-    </section>
-  <hr style="margin: 2rem 0;">
+<div class="container-fluid">
 
-  <div class="table-container mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource">
-      
+
+<div class="manage-mobilizers-page">
+  <header class="page-header">
+    <div>
+      <h2>Manage Mobilizers</h2>
+      <p class="page-copy">Add, edit, and manage your field mobilizers in a single clean dashboard.</p>
+    </div>
+    <div class="header-controls">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput placeholder="Name or phone" (input)="applyFilter($any($event.target).value)" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="addUpdateDialC()">
+        + Add Mobilizer
+      </button>
+    </div>
+  </header>
+
+  <section class="table-panel mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="mobilizer-table">
+
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef> Name </th>
         <td mat-cell *matCellDef="let element"> {{element.name}} </td>
@@ -19,82 +32,83 @@
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <th mat-header-cell *matHeaderCellDef > Actions </th>
         <td mat-cell *matCellDef="let element">
-          <button mat-button color="primary" (click)="addUpdateDialC();onEdit(element)">
-            Edit
-          </button>
-          <button mat-button color="warn" (click)="onDelete(element.id)">
-            Delete
-          </button>
+          <div class="action-buttons">
+            <button mat-button class="btn-edit" (click)="addUpdateDialC(); onEdit(element)">Edit</button>
+            <button mat-button class="btn-delete" (click)="onDelete(element.id)">Delete</button>
+          </div>
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="3">
+          <div class="empty-state">No mobilizers available yet.</div>
+        </td>
+      </tr>
     </table>
 
     <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-  </div>
+  </section>
 </div>
 
 <ng-template #addUpdateMobilizers>
-  <div class="dialog-wrapper">
-    <h2 mat-dialog-title>{{ isEditing ? 'Update Mobilizer' : 'Add New Mobilizer' }}</h2>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>{{ isEditing ? 'Update Mobilizer' : 'Add New Mobilizer' }}</h2>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <div class="grid-two">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Full Name" />
+            <mat-error *ngIf="userForm.get('name')?.touched && userForm.get('name')?.invalid">
+              Valid name required.
+            </mat-error>
+          </mat-form-field>
 
-    <mat-dialog-content>
-      @if (userForm) {
-        <form [formGroup]="userForm" class="modern-form">
-          <div class="form-group">
-            <label>Name</label>
-            <input formControlName="name" type="text" placeholder="Full Name">
-            @if (userForm.get('name')?.touched && userForm.get('name')?.invalid) {
-              <small class="error-msg">Valid name required.</small>
-            }
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone Number</mat-label>
+            <input matInput formControlName="phone" placeholder="07XXXXXXXX" />
+            <mat-error *ngIf="userForm.get('phone')?.invalid && (userForm.get('phone')?.touched || userForm.get('phone')?.hasError('serverError'))">
+              <span *ngIf="userForm.get('phone')?.hasError('required')">Phone is required.</span>
+              <span *ngIf="userForm.get('phone')?.hasError('serverError')">{{ userForm.get('phone')?.getError('serverError') }}</span>
+            </mat-error>
+          </mat-form-field>
+        </div>
 
-          <div class="form-group">
-            <label>Phone Number</label>
-         <input formControlName="phone" 
-         type="text" 
-         [class.error-border]="userForm.get('phone')?.hasError('serverError')">
-            @if (userForm.get('phone')?.invalid && (userForm.get('phone')?.touched || userForm.get('phone')?.hasError('serverError'))) {
-                <div class="error-msg">
-                
-                @if (userForm.get('phone')?.hasError('required')) {
-                    <small>Phone is required.</small>
-                }
+        <div class="dialog-actions">
+          <button type="button" mat-button (click)="resetFormState(); closeDialog()">Cancel</button>
+          <button type="submit" mat-flat-button color="primary" [disabled]="userForm.invalid">
+            {{ isEditing ? 'Save Changes' : 'Add Mobilizer' }}
+          </button>
+        </div>
+      </form>
+  </div>
+</ng-template>
 
-                @if (userForm.get('phone')?.hasError('serverError')) {
-                    <small>{{ userForm.get('phone')?.getError('serverError') }}</small>
-                }
-
-                </div>
-            }
-          </div>
-        </form>
-      }
-    </mat-dialog-content>
+<ng-template #deleteMobilizerDail>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>Delete Property</h2>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <h2 matDialogTitle>Are you sure you want to delete mobilizer?</h2>
 
     <mat-dialog-actions align="end">
-      <button matDialogClose mat-button type="button" (click)="resetFormState(); ">Cancel</button>
-      <button mat-raised-button color="primary" 
-              (click)="onSubmit()" 
-              [disabled]="userForm.invalid">
-        {{ isEditing ? 'Save Changes' : 'Add Mobilizer' }}
-      </button>
+      <button mat-button matDialogClose="no">No</button>
+      <button mat-button matDialogClose="yes" class="danger-btn">Yes</button>
     </mat-dialog-actions>
   </div>
 </ng-template>
 
 
-
-<ng-template #deleteMobilizerDail>
-    <h2 matDialogTitle>Are you sure you want to delete Mobilizer </h2>
-    <mat-dialog-actions align="end">
-        <button mat-button matDialogClose="no">No</button>
-        <button mat-button matDialogClose="yes" style="background-color: red; color: white;">Yes</button>
-    </mat-dialog-actions>
-</ng-template>
-
-
+</div>

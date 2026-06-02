@@ -1,198 +1,228 @@
-/* 1. MAIN CONTAINER & TABLE */
-.form-container {
-  padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
+:root {
+  --blue-dark: #1A3A5C;
+  --blue-mid: #2E6DA4;
+  --blue-light: #EBF4FF;
+  --gray-bg: #F4F6F9;
+  --gray-light: #EEF1F5;
+  --gray-mid: #C9D3DE;
+  --text-primary: #1A1A2E;
+  --text-muted: #64748B;
+  --green: #1A6B3A;
+  --red-mid: #EF4444;
+  --white: #FFFFFF;
 }
 
-.table-container {
+.manage-mobilizers-page {
+  padding: 24px;
+  background: var(--gray-bg);
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-field {
+  width: 260px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: var(--blue-dark);
+}
+
+.page-copy {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 42rem;
+}
+
+.table-panel {
+  background: var(--white);
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.mobilizer-table {
   width: 100%;
-  overflow-x: auto; /* Allows horizontal scroll on small mobile screens */
-  background: white;
-  border-radius: 8px;
-  margin-top: 1rem;
+  border-collapse: collapse;
 }
 
-table {
-  width: 100%;
-  min-width: 500px; /* Ensures table doesn't get too squished */
+.mobilizer-table th,
+.mobilizer-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--gray-light);
+  text-align: left;
+  font-size: 0.95rem;
 }
 
-/* 2. FORM STYLING (Inside Dialog) */
-h2 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.4rem;
-  color: #333;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
+.mobilizer-table th {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font-weight: 700;
 }
 
-form {
+.mobilizer-table tr:last-child td {
+  border-bottom: none;
+}
+
+.mobilizer-table tr:nth-child(even) {
+  background: #fbfbff;
+}
+
+.mobilizer-table td {
+  color: var(--text-primary);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  min-width: 96px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.action-buttons button:hover {
+  transform: translateY(-1px);
+}
+
+.empty-state {
+  padding: 28px 20px;
+  border-radius: 18px;
+  background: var(--white);
+  color: var(--text-muted);
+  font-size: 1rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(18, 52, 93, 0.06);
+}
+
+.mat-paginator {
+  padding: 16px 18px;
+  background: var(--gray-bg);
+}
+
+.dialog-container {
+  padding: 1.8rem;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgba(15, 45, 90, 0.12);
+}
+
+.dialog-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dialog-container h3 {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  color: var(--blue-dark);
+  font-size: 1.3rem;
+}
+
+.dialog-container form {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.form-group label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.form-group input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
+.full-width {
   width: 100%;
-  box-sizing: border-box; /* Ensures padding doesn't break layout */
-  transition: border-color 0.2s;
 }
 
-.form-group input:focus {
-  outline: none;
-  border-color: #3f51b5;
-  box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+.dialog-container mat-form-field {
+  width: 100%;
 }
 
-/* Validation Styling */
-.error-msg {
-  color: #d32f2f;
-  font-size: 0.75rem;
-  margin-top: 2px;
+.dialog-container .mat-form-field-appearance-outline .mat-form-field-outline {
+  border-radius: 14px;
 }
 
-input.ng-invalid.ng-touched {
-  border-color: #d32f2f;
-}
-
-/* 3. BUTTONS & ACTIONS */
-.action-buttons {
+.dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 1.5rem;
-}
-
-/* 4. DELETE DIALOG SPECIFIC */
-h2[matDialogTitle] {
-  color: #d32f2f;
-  border-bottom: none;
+  gap: 12px;
+  margin-top: 1.75rem;
 }
 
 mat-dialog-actions {
-  padding: 1rem 0 0 0;
+  padding: 20px 0 10px 0 !important;
 }
 
-/* 5. RESPONSIVE MEDIA QUERIES */
-@media (max-width: 600px) {
-  .form-container {
-    padding: 0.5rem;
+button[mat-raised-button],
+button[mat-flat-button] {
+  border-radius: 25px;
+  padding: 8px 24px;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.danger-btn {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .manage-mobilizers-page {
+    padding: 16px;
   }
 
-  h2 {
-    font-size: 1.2rem;
-  }
-
-  /* Stack buttons on mobile for easier tapping */
-  .action-buttons {
+  .page-header {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    width: 100%;
   }
 
   .action-buttons button {
     width: 100%;
   }
-
-  /* Adjust Table Cells for Mobile if needed */
-  .mat-mdc-header-cell, 
-  .mat-mdc-cell {
-    padding: 8px !important;
-    font-size: 0.85rem;
-  }
 }
 
-/* Optional: Material Icon button alignment */
-.mat-column-actions {
-  text-align: right;
-  white-space: nowrap;
+.btn-edit {
+  background: #1976d2;
+  color: white !important;
 }
 
-/* Container to give some breathing room */
-.dialog-wrapper {
-  padding: 8px;
-}
-
-h2[mat-dialog-title] {
-  margin: 0;
-  font-weight: 700;
-  color: #333;
-  padding-bottom: 15px;
-}
-
-/* Remove that annoying scrollbar unless absolutely necessary */
-mat-dialog-content {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding: 20px 0 !important;
-  margin: 0 !important;
-}
-
-.modern-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #444;
-}
-
-/* Styled Inputs */
-.form-group input {
-  padding: 14px;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
-  background-color: #fdfdfd;
-  transition: all 0.2s ease-in-out;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #3f51b5;
-  background-color: #fff;
-  box-shadow: 0 4px 10px rgba(63, 81, 181, 0.1);
-}
-
-/* Error Message Styling */
-.error-msg {
-  color: #e53935;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-/* Action Buttons spacing */
-mat-dialog-actions {
-  padding: 20px 0 10px 0 !important;
-}
-
-button[mat-raised-button] {
-  border-radius: 25px; /* Rounded pill button like your screenshot */
-  padding: 8px 24px;
-  text-transform: none;
-  font-weight: 600;
+.btn-delete {
+  background: #d32f2f;
+  color: white !important;
 }

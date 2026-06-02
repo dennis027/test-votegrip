@@ -7,9 +7,12 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MobilizersService } from '../../../services/candidates/mobilizers-service';
 import { AuthService } from '../../../services/auth/auth';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButtonModule, MatIconButton } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 
 export interface mobilizersBody {
@@ -22,12 +25,15 @@ export interface mobilizersBody {
   selector: 'app-manage-mobilizers',
   standalone: true,
   imports: [
-    CommonModule, 
-    MatTableModule, 
-    MatPaginatorModule, 
-    MatButtonModule, 
+    CommonModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
     ReactiveFormsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatIconModule
   ],
   templateUrl: './manage-mobilizers.html',
   styleUrl: './manage-mobilizers.css',
@@ -51,6 +57,10 @@ userForm!: FormGroup;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  closeDialog(): void {
+    this.dialog.closeAll();
+  }
+
    @ViewChild('deleteMobilizerDail') deleteMobilizerDail!: TemplateRef<any>;
    @ViewChild('addUpdateMobilizers') addUpdateMobilizers!: TemplateRef<any>;
 
@@ -58,11 +68,32 @@ userForm!: FormGroup;
     this.initForm();
     if (isPlatformBrowser(this.platformId)) {
       this.getProfile();
+      
+
     }
+    // configure filtering to allow searching by name or phone
+    this.dataSource.filterPredicate = (data: mobilizersBody, filter: string) => {
+      const f = filter.trim().toLowerCase();
+      const name = (data.name || '').toString().toLowerCase();
+      const phone = (data.phone || '').toString().toLowerCase();
+      return name.includes(f) || phone.includes(f);
+    };
+
+    setTimeout(() => {
+      this.dataSource.paginator = this.paginator;
+    },500);
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+  }
+
+  applyFilter(value: string) {
+    const filterValue = (value || '').trim().toLowerCase();
+    this.dataSource.filter = filterValue;
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   initForm() {
@@ -96,10 +127,12 @@ userForm!: FormGroup;
 
 addUpdateDialC() {
     let dialogRef = this.dialog.open(this.addUpdateMobilizers,{
-      width: '400px',
+      minWidth: '400px',
       panelClass: 'custom-dialog-container',
     });
     dialogRef.afterClosed().subscribe(result => {
+      this.isEditing =false
+      this.userForm.reset()
         // Note: If the user clicks outside the dialog or presses the escape key, there'll be no result
         if (result !== undefined) {
             if (result === 'yes') {
@@ -124,7 +157,7 @@ addUpdateDialC() {
 
   const handleResponse = {
     next: () => {
-      this.showSuccess(this.isEditing ? 'Updated!' : 'Added!');
+      this.showSuccess(this.isEditing ? 'Updated Successfully!' : 'Added Successfully!');
       this.getMobilizers();
       this.dialog.closeAll();
       this.resetFormState();
@@ -194,11 +227,22 @@ addUpdateDialC() {
     this.userForm.reset();
   }
 
-  showSuccess(msg: string) {
-    this.snackBar.open(msg, 'OK', { duration: 3000, panelClass: ['success-snackbar'] });
+   showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
   }
 
-  showError(msg: string) {
-    this.snackBar.open(msg, 'Close', { duration: 4000, panelClass: ['error-snackbar'] });
+  showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
   }
+
 }
