@@ -1,7 +1,8 @@
 // main-menu.ts
 import { Component, OnInit, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth/auth';
 
@@ -100,12 +101,63 @@ export class MainMenu implements OnInit {
 
   isSidebarActive = false;
 
+  private readonly openGroupStorageKey = 'mainMenuOpenGroup';
+
   constructor(private router: Router) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.restoreOpenGroupFromRoute(this.router.url);
+
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.restoreOpenGroupFromRoute(event.urlAfterRedirects);
+    });
+  }
+
+  private restoreOpenGroupFromRoute(url: string): void {
+    const persistedGroup = this.getPersistedGroup();
+    const routeGroup = this.findGroupForRoute(url);
+
+    if (routeGroup) {
+      this.openGroup.set(routeGroup);
+      this.persistOpenGroup(routeGroup);
+      return;
+    }
+
+    if (persistedGroup) {
+      this.openGroup.set(persistedGroup);
+    }
+  }
+
+  private findGroupForRoute(url: string): string | null {
+    const activeUrl = url.split('?')[0].split('#')[0];
+    for (const group of this.links) {
+      if (group.items.some(item => item.route === activeUrl || activeUrl.startsWith(item.route))) {
+        return group.group;
+      }
+    }
+    return null;
+  }
+
+  private getPersistedGroup(): string | null {
+    if (typeof window === 'undefined') return null;
+    return window.localStorage.getItem(this.openGroupStorageKey);
+  }
+
+  private persistOpenGroup(groupName: string | null): void {
+    if (typeof window === 'undefined') return;
+    if (groupName) {
+      window.localStorage.setItem(this.openGroupStorageKey, groupName);
+    } else {
+      window.localStorage.removeItem(this.openGroupStorageKey);
+    }
+  }
 
   toggleGroup(groupName: string): void {
-    this.openGroup.set(this.openGroup() === groupName ? null : groupName);
+    const newOpenGroup = this.openGroup() === groupName ? null : groupName;
+    this.openGroup.set(newOpenGroup);
+    this.persistOpenGroup(newOpenGroup);
   }
 
   isGroupOpen(groupName: string): boolean {
