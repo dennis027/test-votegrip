@@ -55,6 +55,7 @@ export class AdminMenu {
         type: 'default',
         items: [
           { name: 'Manage Candidates',route: '/admin-menu/manage-candidates',   icon: 'map' },
+          { name: 'Manage Training',route: '/admin-menu/manage-training',   icon: 'book' },
           { name: 'Agents',          route: '/admin-menu/agents',     icon: 'users' },
           { name: 'Readiness',       route: '/admin-menu/readiness',  icon: 'checklist' },
           { name: 'Communication',   route: '/admin-menu/messages',   icon: 'chat' },
