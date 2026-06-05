@@ -1,0 +1,374 @@
+<!-- pages/manage-training/manage-training.html -->
+<div class="manage-training-page">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div>
+      <h2>Training Modules</h2>
+      <p class="page-copy">Create and manage training materials for field agents.</p>
+    </div>
+    <div class="header-controls">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput placeholder="Title or content type"
+               (input)="applyFilter($any($event.target).value)" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="openAddDialog()">
+        + Add Module
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Summary stats ────────────────────────────────────────────────────── -->
+  <section class="stats-row">
+    <div class="stat-card stat-blue">
+      <span class="stat-value">{{ summary.total }}</span>
+      <span class="stat-label">Total Modules</span>
+    </div>
+    <div class="stat-card stat-amber">
+      <span class="stat-value">{{ summary.in_progress }}</span>
+      <span class="stat-label">In Progress</span>
+    </div>
+    <div class="stat-card stat-green">
+      <span class="stat-value">{{ summary.completed }}</span>
+      <span class="stat-label">Completed</span>
+    </div>
+    <div class="stat-card stat-red">
+      <span class="stat-value">{{ summary.not_started }}</span>
+      <span class="stat-label">Not Started</span>
+    </div>
+    <!-- Progress bar spanning full width -->
+    <div class="stat-card stat-progress">
+      <div class="progress-label">
+        <span>Overall Completion</span>
+        <strong>{{ completionPct() }}%</strong>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="completionPct()"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Table panel ──────────────────────────────────────────────────────── -->
+  <section class="table-panel mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="training-table">
+
+      <!-- Order -->
+      <ng-container matColumnDef="order_index">
+        <th mat-header-cell *matHeaderCellDef> # </th>
+        <td mat-cell *matCellDef="let m">
+          <span class="order-badge">{{ m.order_index }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Title -->
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef> Title </th>
+        <td mat-cell *matCellDef="let m">
+          <div class="module-title-cell">
+            <span class="module-icon">{{ contentTypeIcon(m.content_type) }}</span>
+            <div>
+              <p class="module-name">{{ m.title }}</p>
+              <p class="module-election">{{ m.election_type_name }}</p>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Content type -->
+      <ng-container matColumnDef="content_type">
+        <th mat-header-cell *matHeaderCellDef> Type </th>
+        <td mat-cell *matCellDef="let m">
+          <span class="badge badge-blue">{{ m.content_type_display }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Duration -->
+      <ng-container matColumnDef="duration_minutes">
+        <th mat-header-cell *matHeaderCellDef> Duration </th>
+        <td mat-cell *matCellDef="let m">
+          <span class="duration-text">{{ m.duration_minutes }} min</span>
+        </td>
+      </ng-container>
+
+      <!-- Mandatory -->
+      <ng-container matColumnDef="is_mandatory">
+        <th mat-header-cell *matHeaderCellDef> Required </th>
+        <td mat-cell *matCellDef="let m">
+          @if (m.is_mandatory) {
+            <span class="badge badge-red">Required</span>
+          } @else {
+            <span class="badge badge-gray">Optional</span>
+          }
+        </td>
+      </ng-container>
+
+      <!-- Active status -->
+      <ng-container matColumnDef="is_active">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let m">
+          @if (m.is_active) {
+            <span class="status-badge status-active">● Active</span>
+          } @else {
+            <span class="status-badge status-inactive">● Inactive</span>
+          }
+        </td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let m">
+          <div class="action-buttons">
+            <button mat-button color="accent" (click)="openPreviewDialog(m)">Preview</button>
+            <button mat-button color="primary" (click)="openEditDialog(m)">Edit</button>
+            <button mat-button color="warn"
+                    (click)="openDeleteDialog(m)"
+                    [disabled]="isDeleting() === m.id">
+              @if (isDeleting() === m.id) {
+                <span class="loader"></span>
+              } @else {
+                Remove
+              }
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Empty / loading row -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="7">
+          <div class="empty-state">
+            @if (isLoading()) {
+              <span class="loader-dark"></span>
+            } @else {
+              No training modules found.
+            }
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                   showFirstLastButtons
+                   aria-label="Select page of modules">
+    </mat-paginator>
+  </section>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     ADD / EDIT MODULE DIALOG
+     ══════════════════════════════════════════════════════════════════════════ -->
+<ng-template #moduleFormTemp>
+  <div class="dialog-container">
+    <h3>{{ editingModule ? 'Edit Module' : 'Add Training Module' }}</h3>
+
+    <form [formGroup]="form" (ngSubmit)="saveModule()">
+
+      <!-- Title -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input matInput type="text" formControlName="title" placeholder="e.g. Polling Station Procedures" />
+        <mat-error *ngIf="form.get('title')?.hasError('required')">
+          Title is required.
+        </mat-error>
+        <mat-error *ngIf="form.get('title')?.hasError('serverError')">
+          {{ form.get('title')?.getError('serverError') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Description -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4" placeholder="What will agents learn from this module?"></textarea>
+        <mat-error *ngIf="form.get('description')?.hasError('required')">
+          Description is required.
+        </mat-error>
+        <mat-error *ngIf="form.get('description')?.hasError('serverError')">
+          {{ form.get('description')?.getError('serverError') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Content type + Duration row -->
+      <div class="grid-two">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Content Type</mat-label>
+          <mat-select formControlName="content_type">
+            @for (ct of contentTypes; track ct.value) {
+              <mat-option [value]="ct.value">{{ ct.label }}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="form.get('content_type')?.hasError('serverError')">
+            {{ form.get('content_type')?.getError('serverError') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Duration (minutes)</mat-label>
+          <input matInput type="number" formControlName="duration_minutes" min="1" placeholder="30" />
+          <mat-error *ngIf="form.get('duration_minutes')?.hasError('serverError')">
+            {{ form.get('duration_minutes')?.getError('serverError') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Content URL -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Content URL</mat-label>
+        <input matInput type="url" formControlName="content_url" placeholder="https://example.com/training-guide.pdf" />
+        <mat-error *ngIf="form.get('content_url')?.hasError('required')">
+          Content URL is required.
+        </mat-error>
+        <mat-error *ngIf="form.get('content_url')?.hasError('serverError')">
+          {{ form.get('content_url')?.getError('serverError') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Election Type + Order Index row -->
+      <div class="grid-two">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Election Type ID</mat-label>
+          <input matInput type="text" formControlName="election_type" placeholder="UUID of election type" />
+          <mat-error *ngIf="form.get('election_type')?.hasError('required')">
+            Election type is required.
+          </mat-error>
+          <mat-error *ngIf="form.get('election_type')?.hasError('serverError')">
+            {{ form.get('election_type')?.getError('serverError') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Order Index</mat-label>
+          <input matInput type="number" formControlName="order_index" min="0" placeholder="0" />
+        </mat-form-field>
+      </div>
+
+      <!-- Mandatory toggle -->
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="is_mandatory" class="toggle-input">
+          <span class="toggle-track"></span>
+          <span class="toggle-text">Mark as mandatory for all agents</span>
+        </label>
+      </div>
+
+      <!-- Dialog actions -->
+      <div class="dialog-actions">
+        <button type="button" mat-button (click)="closeDialog()">Cancel</button>
+        <button type="submit" mat-flat-button color="primary"
+                [disabled]="isSubmitting() || form.invalid">
+          @if (isSubmitting()) {
+            <span class="loader"></span>
+          } @else {
+            {{ editingModule ? 'Update Module' : 'Save Module' }}
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     DELETE CONFIRM DIALOG
+     ══════════════════════════════════════════════════════════════════════════ -->
+<ng-template #deleteConfirmTemp>
+  <div class="dialog-container dialog-confirm">
+    <div class="confirm-icon">🗑️</div>
+    <h3>Delete Module?</h3>
+    <p class="confirm-text">
+      You are about to delete
+      <strong>{{ deletingModule?.title }}</strong>.
+      This action cannot be undone and will remove all associated progress records.
+    </p>
+    <div class="dialog-actions">
+      <button type="button" mat-button (click)="closeDialog()">Cancel</button>
+      <button type="button" mat-flat-button color="warn"
+              (click)="confirmDelete()"
+              [disabled]="isDeleting() !== null">
+        @if (isDeleting() !== null) {
+          <span class="loader"></span>
+        } @else {
+          Yes, Delete
+        }
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PREVIEW MODULE DIALOG
+     ══════════════════════════════════════════════════════════════════════════ -->
+<ng-template #previewDialogTemp>
+  <div class="dialog-container dialog-preview">
+    <div class="preview-header">
+      <h3>{{ previewingModule?.title }}</h3>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="preview-content">
+      @switch (previewingModule?.content_type) {
+        @case ('video') {
+          <div class="preview-video">
+            @if (isYoutubeUrl(previewingModule?.content_url)) {
+              <iframe [src]="convertYoutubeUrl(previewingModule?.content_url) | safe" 
+                      title="YouTube video player" frameborder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowfullscreen></iframe>
+            } @else {
+              <div class="preview-error">
+                <p>⚠️ Video cannot be embedded directly.</p>
+                <p><strong>Video URL:</strong></p>
+                <a [href]="previewingModule?.content_url" target="_blank" rel="noopener">{{ previewingModule?.content_url }}</a>
+              </div>
+            }
+          </div>
+        }
+        @case ('pdf') {
+          <div class="preview-pdf">
+            <div class="preview-error">
+              <p>📄 PDF cannot be previewed in browser due to security restrictions.</p>
+              <p><strong>Download or open the PDF:</strong></p>
+              <a [href]="previewingModule?.content_url" target="_blank" rel="noopener" class="btn-download">
+                📥 Open PDF
+              </a>
+            </div>
+          </div>
+        }
+        @case ('Interactive') {
+          <div class="preview-article">
+            <h4 style="margin-top: 0; color: var(--blue-dark);">Description</h4>
+            <p>{{ previewingModule?.description }}</p>
+            <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
+            <p class="preview-url">
+              <strong>📖 Full Article:</strong> <a [href]="previewingModule?.content_url" target="_blank" rel="noopener">Visit Article</a>
+            </p>
+          </div>
+        }
+        @case ('quiz') {
+          <div class="preview-quiz">
+            <p style="color: var(--text-muted);">❓ Quiz content is interactive and not directly previewable here.</p>
+            <p class="preview-url">
+              <strong>Access Quiz:</strong> <a [href]="previewingModule?.content_url" target="_blank" rel="noopener">{{ previewingModule?.content_url }}</a>
+            </p>
+          </div>
+        }
+        @default {
+          <div class="preview-fallback">
+            <p>📁 Content preview not available for this type.</p>
+            <p class="preview-url">
+              <strong>Content URL:</strong> <a [href]="previewingModule?.content_url" target="_blank" rel="noopener">{{ previewingModule?.content_url }}</a>
+            </p>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</ng-template>
