@@ -40,7 +40,7 @@ export class SafePipe implements PipeTransform {
 
 export interface TrainingModule {
   id:                   string;
-  election_type:        string;
+  // election_type:        string;
   election_type_name:   string;
   title:                string;
   description:          string;
@@ -135,7 +135,7 @@ export class ManageTraining implements OnInit {
     duration_minutes: [30, [Validators.required, Validators.min(1)]],
     is_mandatory:     [true],
     order_index:      [0, [Validators.required, Validators.min(0)]],
-    election_type:    ['', [Validators.required]],
+    // election_type:    ['', [Validators.required]],
   });
 
   readonly contentTypes = [
@@ -240,7 +240,7 @@ export class ManageTraining implements OnInit {
       duration_minutes: module.duration_minutes,
       is_mandatory:     module.is_mandatory,
       order_index:      module.order_index,
-      election_type:    module.election_type,
+      // election_type:    module.election_type,
     });
     this.activeDialog = this.dialog.open(this.moduleFormTemp, {
       width: '580px', disableClose: true
