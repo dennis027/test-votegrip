@@ -6,8 +6,24 @@
     </div>
   </header>
 
-  <section class="table-panel mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" class="candidate-table">
+  <div class="controls" style="margin:16px 0; display:flex; gap:12px; align-items:center;">
+    <input
+      placeholder="Search by name, email or phone"
+      (input)="applyFilter($event.target.value)"
+      style="flex:1; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0;"
+    />
+  </div>
+
+  <div *ngIf="!hasAnyData" class="empty-state" style="text-align:center; padding:48px 12px; color:#64748b;">
+    <h3>No data for now</h3>
+    <p>Please wait — registered candidate data will appear here shortly.</p>
+  </div>
+
+  <section *ngFor="let pos of positions">
+    <ng-container *ngIf="positionDataSources[pos] && positionDataSources[pos].data.length">
+      <h3 style="margin: 0 0 12px 0; text-transform: capitalize">{{ pos }}</h3>
+      <section class="table-panel mat-elevation-z8">
+        <table mat-table [dataSource]="positionDataSources[pos]" class="candidate-table">
 
       <!-- First Name Column -->
       <ng-container matColumnDef="first_name">
@@ -44,13 +60,15 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
-                   showFirstLastButtons
-                   aria-label="Select page of candidates">
-    </mat-paginator>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                       showFirstLastButtons
+                       aria-label="Select page of candidates">
+        </mat-paginator>
+      </section>
+    </ng-container>
   </section>
 </div>
