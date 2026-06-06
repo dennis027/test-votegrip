@@ -13,7 +13,14 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getAccessToken();
 
-    const cloned = token
+    // Don't attach Authorization header for known unauthenticated endpoints
+    const unauthenticatedPaths = [
+      '/auth/candidates/register'
+    ];
+
+    const shouldSkipAuth = unauthenticatedPaths.some(p => req.url.includes(p));
+
+    const cloned = (token && !shouldSkipAuth)
       ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
       : req;
 

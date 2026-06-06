@@ -17,9 +17,13 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         (req, next) => {
           const platformId = inject(PLATFORM_ID);
-          
+
+          // Don't attach Authorization for unauthenticated endpoints
+          const unauthenticatedPaths = ['/auth/candidates/register'];
+          const shouldSkipAuth = unauthenticatedPaths.some(p => req.url.includes(p));
+
           // ✅ Only access localStorage in the browser
-          if (isPlatformBrowser(platformId)) {
+          if (isPlatformBrowser(platformId) && !shouldSkipAuth) {
             const token = localStorage.getItem('access_token');
             if (token) {
               const cloned = req.clone({
@@ -30,7 +34,7 @@ export const appConfig: ApplicationConfig = {
               return next(cloned);
             }
           }
-          
+
           return next(req);
         }
       ])

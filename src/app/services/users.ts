@@ -26,9 +26,10 @@ export class UsersService {
     first_name: string;
     last_name: string;
     email: string;
-    phone:string;
+    phone: string;
   }): Observable<any> {
-    return this.http.post<any>(this.requestLoginCredentials, payload);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<any>(this.requestLoginCredentials, payload, { headers });
   }
 
 
