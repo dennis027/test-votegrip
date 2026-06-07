@@ -1,4 +1,5 @@
-import { Component, inject, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ViewChildren, QueryList, afterNextRender } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ViewChildren, QueryList } from '@angular/core';
+import { ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -6,6 +7,10 @@ import { UsersService } from '../../../services/users';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 export interface Candidate {
@@ -24,11 +29,11 @@ export interface Candidate {
 @Component({
   selector: 'app-manage-candidates',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatPaginatorModule, MatButtonModule],
+  imports: [CommonModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatInputModule, FormsModule],
   templateUrl: './manage-candidates.html',
   styleUrls: ['./manage-candidates.css'],
 })
-export class ManageCandidates implements OnDestroy { // ← removed OnInit
+export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
 
   displayedColumns: string[] = ['first_name', 'last_name', 'email', 'phone', 'actions'];
   positions: string[] = ['president', 'senator', 'mp', 'womenrep', 'mca', 'governor'];
@@ -60,25 +65,28 @@ export class ManageCandidates implements OnDestroy { // ← removed OnInit
   private platformId = inject(PLATFORM_ID);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
+  private dialog = inject(MatDialog);
+  @ViewChild('rejectDialog') rejectDialogTpl!: TemplateRef<any>;
+  currentRejectCandidate?: Candidate;
+  rejectReason = '';
+  private activeDialogRef?: MatDialogRef<any>;
 
-  // ↓ Constructor replaces ngOnInit — afterNextRender is browser-only by design
-  constructor() {
-    afterNextRender(() => {
-      const token =
-        localStorage.getItem('access_token') ||
-        sessionStorage.getItem('access_token');
+  ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
 
-      if (!token) {
-        this.showError('Session expired. Please log in again.');
-        this.route.navigate(['login']);
-        return;
-      }
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    if (!token) {
+      this.showError('Session expired. Please log in again.');
+      this.route.navigate(['login']);
+      return;
+    }
 
-      this.loadCandidates();
-    });
+    this.loadCandidates();
   }
 
-  // ← No ngOnInit at all
+  ngAfterViewInit() {
+    // no-op: paginator wiring handled via ViewChildren setter
+  }
 
   loadCandidates() {
     if (!isPlatformBrowser(this.platformId)) return; // belt-and-suspenders
@@ -207,16 +215,36 @@ export class ManageCandidates implements OnDestroy { // ← removed OnInit
   }
 
   rejectCandidate(candidate: Candidate) {
-    this.userService.rejectCandidate(candidate.id).subscribe({
-      next: () => {
-        this.showSuccess('Candidate rejected successfully.');
-        this.removeCandidateFromPosition(candidate.id);
-      },
-      error: (error) => {
-        console.error('Reject Error:', error);
-        this.showError('Failed to reject candidate.');
-      }
+    // open inline dialog template to capture rejection reason
+    this.currentRejectCandidate = candidate;
+    this.rejectReason = '';
+    this.activeDialogRef = this.dialog.open(this.rejectDialogTpl, { width: '520px' });
+
+    this.activeDialogRef.afterClosed().subscribe((reason: string | undefined) => {
+      this.activeDialogRef = undefined;
+      this.currentRejectCandidate = undefined;
+      if (reason === undefined) return; // cancelled
+
+      this.userService.rejectCandidate(candidate.id, reason || undefined).subscribe({
+        next: () => {
+          this.showSuccess('Candidate rejected successfully.');
+          this.removeCandidateFromPosition(candidate.id);
+        },
+        error: (error) => {
+          console.error('Reject Error:', error);
+          this.showError('Failed to reject candidate.');
+        }
+      });
     });
+  }
+
+  closeRejectDialog(confirm: boolean) {
+    if (!this.activeDialogRef) return;
+    if (confirm) {
+      this.activeDialogRef.close(this.rejectReason || '');
+    } else {
+      this.activeDialogRef.close(undefined);
+    }
   }
 
   private removeCandidateFromPosition(candidateId: string) {

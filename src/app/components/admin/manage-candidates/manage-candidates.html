@@ -6,6 +6,25 @@
     </div>
   </header>
 
+  <!-- Inline reject dialog template -->
+  <ng-template #rejectDialog>
+    <h2 mat-dialog-title>Reject Candidate</h2>
+    <div mat-dialog-content>
+      <p *ngIf="currentRejectCandidate">Rejecting: <strong>{{ currentRejectCandidate.first_name }} {{ currentRejectCandidate.last_name }}</strong></p>
+      <mat-form-field appearance="outline" style="width:100%;">
+        <mat-label>Rejection reason (optional)</mat-label>
+        <textarea matInput [(ngModel)]="rejectReason" rows="5" maxlength="800"></textarea>
+        <mat-hint align="end">{{ rejectReason.length || 0 }} / 800</mat-hint>
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="closeRejectDialog(false)">Cancel</button>
+      <button mat-flat-button color="warn" (click)="closeRejectDialog(true)">Reject</button>
+    </div>
+  </ng-template>
+
+  <!-- dialog opened dynamically via MatDialog -->
+
   <div class="controls" style="margin:16px 0; display:flex; gap:12px; align-items:center;">
     <input
       placeholder="Search by name, email or phone"
