@@ -14,6 +14,7 @@ import { ManageCandidates } from './components/admin/manage-candidates/manage-ca
 import { ManageAgents } from './components/candidates/manage-agents/manage-agents';
 import { ManageMobilizers } from './components/candidates/manage-mobilizers/manage-mobilizers';
 import { ManageTraining } from './components/admin/manage-training/manage-training';
+import { CurrentCustomers } from './components/admin/current-customers/current-customers';
 
 export const routes: Routes = [
   {path:'',component:Home},
@@ -32,7 +33,8 @@ export const routes: Routes = [
   {path:'admin-menu', canActivate: [AuthGuard], component:AdminMenu,children:[
       {path:'admin-dashboard',component:AdminDashboard },
       {path:"manage-candidates", component:ManageCandidates},
-      {path:'manage-training',component:ManageTraining}
+      {path:'manage-training',component:ManageTraining},
+      {path:'current-customers',component:CurrentCustomers},
 
   ]},
 
