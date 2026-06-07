@@ -34,7 +34,11 @@ export class UsersService {
 
 
   getUsersList(type:any, candidate_id:any): Observable<any> {
-    const url = `${this.usersApi}type=${type}&candidate_id=${candidate_id}`;
+    // build query without candidate_id when it's null/undefined to avoid filtering out results
+    const base = `${this.usersApi}type=${encodeURIComponent(type)}`;
+    const url = (candidate_id === null || candidate_id === undefined)
+      ? base
+      : `${base}&candidate_id=${encodeURIComponent(candidate_id)}`;
     const headers = this.authService.getAccessToken()
       ? new HttpHeaders({
           'Content-Type': 'application/json',
@@ -45,7 +49,7 @@ export class UsersService {
     return this.http.get<any>(url, { headers });
   }
 
-  approveCandidate(candidateId: number): Observable<any> {
+  approveCandidate(candidateId: string | number): Observable<any> {
     const url = `${this.approveCandidateUrl}${candidateId}/verify/approve/`;
     const headers = this.authService.getAccessToken()
       ? new HttpHeaders({
@@ -57,7 +61,7 @@ export class UsersService {
     return this.http.post<any>(url, {}, { headers });
   }
 
-  rejectCandidate(candidateId: number): Observable<any> {
+  rejectCandidate(candidateId: string | number, rejectionReason?: string): Observable<any> {
     const url = `${this.rejectCandidateUrl}${candidateId}/verify/reject/`;
     const headers = this.authService.getAccessToken()
       ? new HttpHeaders({
@@ -66,8 +70,10 @@ export class UsersService {
         })
       : new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.http.post<any>(url, {}, { headers });
-  }   
+    const body = rejectionReason ? { reason: rejectionReason } : {};
+
+    return this.http.post<any>(url, body, { headers });
+  }
 
 
   
