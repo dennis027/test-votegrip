@@ -1,0 +1,78 @@
+<div class="current-users-page">
+  <header class="page-header">
+    <div>
+      <h2>Current Candidates</h2>
+      <p class="page-copy">All approved candidates grouped by their contested position.</p>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input
+      placeholder="Search by name, email or phone"
+      (input)="applyFilter($any($event.target).value)"
+      class="search-input"
+    />
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <p>Loading candidates...</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && !hasAnyData" class="empty-state">
+    <h3>No approved candidates yet</h3>
+    <p>Approved candidates will appear here once verified.</p>
+  </div>
+
+  <!-- Tables grouped by position -->
+  <ng-container *ngIf="!isLoading">
+    <section *ngFor="let pos of positions">
+      <ng-container *ngIf="positionDataSources[pos] && positionDataSources[pos].data.length">
+        <h3 class="position-label">{{ pos }}</h3>
+        <section class="table-panel mat-elevation-z8">
+          <table mat-table [dataSource]="positionDataSources[pos]" class="candidate-table">
+
+            <ng-container matColumnDef="first_name">
+              <th mat-header-cell *matHeaderCellDef>First Name</th>
+              <td mat-cell *matCellDef="let c">{{ c.first_name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="last_name">
+              <th mat-header-cell *matHeaderCellDef>Last Name</th>
+              <td mat-cell *matCellDef="let c">{{ c.last_name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let c">{{ c.email }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="phone">
+              <th mat-header-cell *matHeaderCellDef>Phone</th>
+              <td mat-cell *matCellDef="let c">{{ c.phone }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let c">
+                <div class="action-buttons">
+                  <button mat-raised-button class="btn-more">View More</button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <mat-paginator
+            [pageSizeOptions]="[5, 10, 20]"
+            showFirstLastButtons
+            aria-label="Select page">
+          </mat-paginator>
+        </section>
+      </ng-container>
+    </section>
+  </ng-container>
+</div>
