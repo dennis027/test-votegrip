@@ -132,9 +132,27 @@ export class MainMenu implements OnInit {
 
   private findGroupForRoute(url: string): string | null {
     const activeUrl = url.split('?')[0].split('#')[0];
+
+    // Normalize to avoid issues with or without leading slash
+    const normalize = (u: string) => u.replace(/\/$/, '');
+    const a = normalize(activeUrl);
+
     for (const group of this.links) {
-      if (group.items.some(item => item.route === activeUrl || activeUrl.startsWith(item.route))) {
-        return group.group;
+      for (const item of group.items) {
+        const r = normalize(item.route || '');
+
+        // match exactly, startsWith (deeper child routes), or fuzzy contains
+        if (
+          r && (
+            a === r ||
+            a.startsWith(r) ||
+            r.startsWith(a) ||
+            a.includes(r) ||
+            r.includes(a)
+          )
+        ) {
+          return group.group;
+        }
       }
     }
     return null;
