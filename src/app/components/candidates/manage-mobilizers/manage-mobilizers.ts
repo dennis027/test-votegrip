@@ -118,13 +118,15 @@ userForm!: FormGroup;
 
   getMobilizers() {
     this.mobilizersService.getMobilizersList().subscribe({
-      next: (response) => {
-        this.dataSource.data = response.data;
+      next: (response: any) => {
+        // Change 'response.data' to 'response.results'
+        this.dataSource.data = response.results || []; 
       },
       error: () => this.showError('Failed to load mobilizers.')
     });
   }
 
+  
 addUpdateDialC() {
     let dialogRef = this.dialog.open(this.addUpdateMobilizers,{
       minWidth: '400px',
