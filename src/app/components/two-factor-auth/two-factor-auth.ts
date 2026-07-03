@@ -1,8 +1,9 @@
-import { Component, signal, viewChildren, ElementRef, computed, inject, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, viewChildren, ElementRef, computed, inject, OnDestroy, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeviceService } from '../../services/device/device-service';
 
 @Component({
   selector: 'app-two-factor-auth',
@@ -19,10 +20,11 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
   destroyed = false;
 
   private authService = inject(AuthService);
-
+  private deviceService = inject(DeviceService);
   private route = inject(Router);
-
   private snackBar = inject(MatSnackBar);
+  @Inject(PLATFORM_ID) private platformId = inject(PLATFORM_ID);
+
   showSuccess(message: string) {
     if (!this.destroyed) {
       this.snackBar.open(message, 'Close', {
@@ -46,9 +48,11 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const pendingKey = localStorage.getItem('pending_token');
-    if (!pendingKey?.trim()) {
-      this.route.navigate(['login']);
+    if (isPlatformBrowser(this.platformId)) {
+      const pendingKey = localStorage.getItem('pending_token');
+      if (!pendingKey?.trim()) {
+        this.route.navigate(['login']);
+      }
     }
   }
 
@@ -56,10 +60,7 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
     this.destroyed = true;
   }
 
-
-  // Use the #otpInput reference from the HTML
   inputs = viewChildren<ElementRef<HTMLInputElement>>('otpInput');
-
   code = computed(() => this.otp().join(''));
 
   onInput(event: Event, index: number) {
@@ -75,11 +76,9 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
         return next;
       });
 
-      // Crucial: Manually set the value to prevent the "double-digit" bug
       input.value = char;
 
       if (index < 5) {
-        // Safe access to the next input via signals
         const allInputs = this.inputs();
         if (allInputs[index + 1]) {
           allInputs[index + 1].nativeElement.focus();
@@ -97,7 +96,6 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
 
   onKeyDown(event: KeyboardEvent, index: number) {
     if (event.key === 'Backspace') {
-      // If current box is empty, move focus back and clear previous
       if (!this.otp()[index] && index > 0) {
         this.otp.update(prev => {
           const next = [...prev];
@@ -109,7 +107,6 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
         prevInput.value = '';
         prevInput.focus();
       } else {
-        // Just clear current box
         this.otp.update(prev => {
           const next = [...prev];
           next[index] = '';
@@ -130,26 +127,12 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
       return next;
     });
 
-    // Update physical DOM values
     this.inputs().forEach((input, i) => {
       input.nativeElement.value = this.otp()[i];
     });
 
     const focusIdx = Math.min(digits.length, 5);
     this.inputs()[focusIdx].nativeElement.focus();
-  }
-
-  verifyCode() {
-    if (this.code().length !== 6) {
-      this.errorMessage.set('Please enter all 6 digits.');
-      return;
-    }
-    this.isSubmitting.set(true);
-    // Simulate API call
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      console.log('Verified:', this.code());
-    }, 1500);
   }
 
   resendCode() {
@@ -164,28 +147,31 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
     });
   }
 
-post2FAVerification() {
-  if (!this.code() || this.code().length !== 6) {
-    this.errorMessage.set('Please enter the 6-digit verification code.');
-    return;
-  }
-
-  this.errorMessage.set('');
-
-  this.authService.twoFactorVerify(this.code()).subscribe({
-    next: (res) => {
-      const role = res.data.user.role.name;
-      const dashboardRoute = role === 'admin' ? 'admin-menu/admin-dashboard' : 'main-menu/dashboard';
-      this.route.navigate([dashboardRoute]);
-      this.showSuccess('2FA verification successful! Welcome to the dashboard.');
-    },
-    error: (err) => {
-      console.error('2FA verification failed:', err);
-      this.errorMessage.set(
-        err?.error?.message || 'Invalid code. Please try again.'
-      );
-      this.showError('2FA verification failed. Please check the code and try again.');
+  post2FAVerification() {
+    if (!this.code() || this.code().length !== 6) {
+      this.errorMessage.set('Please enter the 6-digit verification code.');
+      return;
     }
-  });
-}
+
+    this.errorMessage.set('');
+    this.isSubmitting.set(true);
+
+    this.authService.twoFactorVerify(this.code()).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+        const role = res.data.user.role.name;
+        const dashboardRoute = role === 'admin' ? 'admin-menu/admin-dashboard' : 'main-menu/dashboard';
+        this.route.navigate([dashboardRoute]);
+        this.showSuccess('2FA verification successful! Welcome to the dashboard.');
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        console.error('2FA verification failed:', err);
+        this.errorMessage.set(
+          err?.error?.message || 'Invalid code. Please try again.'
+        );
+        this.showError('2FA verification failed. Please check the code and try again.');
+      }
+    });
+  }
 }

@@ -28,7 +28,7 @@
       {{ errorMessage() }}
     </div>
 
-    <button class="verify-btn" (click)="verifyCode();post2FAVerification()" [disabled]="isSubmitting() || code().length < 6">
+    <button class="verify-btn" (click)="post2FAVerification()" [disabled]="isSubmitting() || code().length < 6">
       @if (!isSubmitting()) {
         <span>Verify & Proceed</span>
       } @else {
