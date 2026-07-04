@@ -57,14 +57,59 @@ export class MainMenu implements OnInit {
       group: 'Pre-Election',
       type: 'default',
       items: [
-        { name: 'Manage Agents',  route: '/main-menu/manage-agents',   icon: 'map' },
-        { name: 'Manage Mobilizers',route: '/main-menu/manage-mobilizers',     icon: 'users' },
-        { name: 'Readiness',       route: '/main-menu/readiness',  icon: 'checklist' },
-        { name: 'Communication',   route: '/main-menu/messages',   icon: 'chat' },
-        { name: 'Field Intel',     route: '/main-menu/intel',      icon: 'flag' },
-        { name: 'Finance',         route: '/main-menu/finance',    icon: 'dollar' },
+                {
+                  name: 'Manage Agents',
+                  route: '/main-menu/manage-agents',
+                  icon: 'people'
+                },
+                {
+                  name: 'Manage Mobilizers',
+                  route: '/main-menu/manage-mobilizers',
+                  icon: 'person-add'
+                },
+                {
+                  name: 'Assign Polling Station',
+                  route: '/main-menu/assign-polling-station',
+                  icon: 'location'
+                },
+                {
+                  name: 'Documentation',
+                  route: '/main-menu/documentation',
+                  icon: 'document-text'
+                },
+                {
+                  name: 'Field Intel',
+                  route: '/main-menu/field-intel',
+                  icon: 'eye'
+                },
+                {
+                  name: 'Inventory',
+                  route: '/main-menu/inventory',
+                  icon: 'cube'
+                },
+                {
+                  name: 'Schedules',
+                  route: '/main-menu/schedules',
+                  icon: 'calendar'
+                },
+                {
+                  name: 'Structure',
+                  route: '/main-menu/structure',
+                  icon: 'git-network'
+                }
+            ]
+    },
+
+    //expenses
+
+    {
+      group: 'Expenses',
+      type: 'default',
+      items: [
+          { name: 'Expenses', route: '/main-menu/expenses',      icon: 'payments' },
       ]
     },
+    
 
         // ── Nomination Day ────────────────────────────────────────────────────
     {
