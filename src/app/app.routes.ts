@@ -15,6 +15,15 @@ import { ManageAgents } from './components/candidates/manage-agents/manage-agent
 import { ManageMobilizers } from './components/candidates/manage-mobilizers/manage-mobilizers';
 import { ManageTraining } from './components/admin/manage-training/manage-training';
 import { CurrentCustomers } from './components/admin/current-customers/current-customers';
+import { FieldIntel } from './components/candidates/field-intel/field-intel';
+import { AssignPollingStation } from './components/candidates/assign-polling-station/assign-polling-station';
+import { CoverGaps } from './components/candidates/cover-gaps/cover-gaps';
+import { Documentations } from './components/candidates/documentations/documentations';
+import { Inventory } from './components/candidates/inventory/inventory';
+import { Schedules } from './components/candidates/schedules/schedules';
+import { Structure } from './components/candidates/structure/structure';
+import { Expenses } from './components/candidates/expenses/expenses';
+
 
 export const routes: Routes = [
   {path:'',component:Home},
@@ -28,6 +37,15 @@ export const routes: Routes = [
       {path:'dashboard',component:Dashboard },
       {path:"manage-agents", component:ManageAgents},
       {path:"manage-mobilizers", component:ManageMobilizers}, 
+      {path:'field-intel',component:FieldIntel},
+      {path:'assign-polling-station', component:AssignPollingStation},
+      {path:'cover-gaps', component:CoverGaps},
+      {path:'documentation', component:Documentations},
+      {path:'inventory', component:Inventory},
+      {path:'schedules', component:Schedules },
+      {path:'structure',component:Structure },
+      {path:'expenses', component:Expenses}
+
   ]},
 
   {path:'admin-menu', canActivate: [AuthGuard], component:AdminMenu,children:[
