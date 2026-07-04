@@ -85,6 +85,9 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ]
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy"
         }
       }
     }
