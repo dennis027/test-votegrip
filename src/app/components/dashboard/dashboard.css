@@ -53,68 +53,58 @@ body { font-family: var(--font-body); background: var(--gray-bg); }
 /* ── Welcome banner ──────────────────────────────────────────────────────── */
 .welcome-banner {
   position: relative;
-  background: linear-gradient(135deg, #0F2440 0%, #1A3A5C 55%, #1E4A78 100%);
-  border-radius: var(--radius-xl);
-  padding: 1.75rem 2rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
 }
 .welcome-banner-bg {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
+  display: none;
 }
 .welcome-banner::after {
-  content: '';
-  position: absolute;
-  width: 320px; height: 320px;
-  top: -80px; right: 100px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(74,144,217,0.12) 0%, transparent 70%);
-  pointer-events: none;
+  display: none;
 }
 
 .welcome-left {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
   position: relative;
   z-index: 1;
 }
 .welcome-avatar {
-  width: 58px; height: 58px;
+  width: 56px; height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--blue-accent), #6CB4FF);
-  border: 3px solid rgba(255,255,255,0.2);
-  color: white;
+  background: linear-gradient(135deg, var(--blue-accent), var(--blue-mid));
+  border: 2px solid var(--white);
+  color: var(--white);
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(74,144,217,0.35);
+  box-shadow: var(--shadow-sm);
 }
 .welcome-greeting {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 0.2rem;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin-bottom: 0.12rem;
 }
 .welcome-name {
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  color: var(--white);
+  color: var(--text-primary);
   letter-spacing: -0.01em;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.35rem;
 }
 .welcome-meta {
   display: flex;
@@ -125,15 +115,28 @@ body { font-family: var(--font-body); background: var(--gray-bg); }
 .meta-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.55);
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 0.25rem 0.65rem;
-  border-radius: 20px;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  padding: 0.12rem 0.28rem;
+  border-radius: 999px;
 }
-.meta-tag svg { width: 11px; height: 11px; fill: currentColor; opacity: 0.7; }
+.meta-tag svg { width: 13px; height: 13px; fill: currentColor; opacity: 0.75; }
+
+/* Keep meta icons visually subtle and aligned with card text */
+.welcome-banner .meta-tag { margin-right: 0.6rem; }
+
+/* Right area alignment */
+.welcome-right { display: flex; align-items: flex-start; justify-content: flex-end; min-width: 160px; }
+.welcome-right .countdown-card { align-self: flex-start; }
+
+/* Slightly increase svg weight throughout the banner for consistency */
+.welcome-banner svg { width: 14px; height: 14px; vertical-align: middle; }
+
+/* Reduce overall banner height a touch for parity with other cards */
+.welcome-banner { padding-top: 1rem; padding-bottom: 1rem; }
 
 .welcome-right {
   position: relative;
@@ -141,37 +144,32 @@ body { font-family: var(--font-body); background: var(--gray-bg); }
   flex-shrink: 0;
 }
 .countdown-card {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: var(--white);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.1rem 1.5rem;
+  padding: 0.9rem 1.05rem;
   text-align: center;
-  backdrop-filter: blur(8px);
-  min-width: 120px;
+  min-width: 140px;
+  box-shadow: var(--shadow-sm);
 }
 .countdown-days {
   font-family: var(--font-display);
-  font-size: 2.6rem;
+  font-size: 2rem;
   font-weight: 800;
-  color: var(--white);
+  color: var(--blue-dark);
   line-height: 1;
   margin-bottom: 0.2rem;
 }
 .countdown-label {
-  font-size: 0.68rem;
-  color: rgba(255,255,255,0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: none;
+  margin-bottom: 0.3rem;
 }
 .countdown-date {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #93C5FD;
-  background: rgba(147,197,253,0.1);
-  padding: 0.2rem 0.6rem;
-  border-radius: 10px;
+  color: var(--blue-mid);
 }
 
 /* ── Phase progress bar ──────────────────────────────────────────────────── */
