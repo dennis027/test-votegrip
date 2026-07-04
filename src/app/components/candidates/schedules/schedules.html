@@ -1,0 +1,214 @@
+<div class="container-fluid">
+
+<div class="schedules-page">
+  <header class="page-header">
+    <div>
+      <h2>Schedules</h2>
+      <p class="page-copy">Plan and track upcoming rallies, meetings, and field activities.</p>
+    </div>
+    <div class="header-controls">
+      <button mat-flat-button color="primary" (click)="addUpdateDialC()">
+        + Add Activity
+      </button>
+    </div>
+  </header>
+
+  <div class="calendar-layout">
+
+    <!-- Calendar panel -->
+    <section class="calendar-panel mat-elevation-z8">
+      <div class="calendar-toolbar">
+        <button mat-icon-button (click)="prevMonth()" aria-label="Previous month">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <h3>{{ monthLabel() }}</h3>
+        <button mat-icon-button (click)="nextMonth()" aria-label="Next month">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button mat-button class="today-btn" (click)="goToToday()">Today</button>
+      </div>
+
+      <div class="weekday-row">
+        <span *ngFor="let w of weekdayLabels">{{ w }}</span>
+      </div>
+
+      <div class="calendar-grid">
+        <ng-container *ngFor="let week of calendarWeeks">
+          <div
+            class="calendar-cell"
+            *ngFor="let day of week"
+            [class.outside-month]="!day.inCurrentMonth"
+            [class.is-today]="day.isToday"
+            [class.is-selected]="day.dateKey === selectedDateKey"
+            (click)="selectDay(day.dateKey)"
+          >
+            <div class="cell-date-row">
+              <span class="cell-date">{{ day.date.getDate() }}</span>
+              <button
+                mat-icon-button
+                class="cell-add-btn"
+                (click)="$event.stopPropagation(); addUpdateDialC(day.dateKey)"
+                aria-label="Add activity on this day"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+
+            <div class="cell-activities">
+              <div
+                class="activity-chip"
+                *ngFor="let a of day.activities.slice(0, 2)"
+                [ngClass]="'type-' + a.activity_type"
+              >
+                {{ a.activity_name }}
+              </div>
+              <div class="more-chip" *ngIf="day.activities.length > 2">
+                +{{ day.activities.length - 2 }} more
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </section>
+
+    <!-- Side panel -->
+    <aside class="side-panel">
+
+      <div class="day-detail-card mat-elevation-z8" *ngIf="selectedDateKey">
+        <h4>{{ selectedDateKey }}</h4>
+        <div class="day-activity-list" *ngIf="selectedDayActivities.length; else noDayActivities">
+          <div class="day-activity-item" *ngFor="let a of selectedDayActivities">
+            <div class="dai-top">
+              <span class="type-dot" [ngClass]="'type-' + a.activity_type"></span>
+              <span class="dai-name">{{ a.activity_name }}</span>
+            </div>
+            <div class="dai-time">
+              {{ a.start_time | date:'shortTime' }} &ndash; {{ a.end_time | date:'shortTime' }}
+            </div>
+            <div class="dai-location" *ngIf="a.location">{{ a.location }}</div>
+            <span class="status-pill" [ngClass]="'status-' + a.status">{{ a.status_display || a.status }}</span>
+            <div class="dai-actions">
+              <button mat-button class="btn-edit" (click)="onEdit(a)">Edit</button>
+              <button mat-button class="btn-delete" (click)="onDelete(a.id!)">Delete</button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noDayActivities>
+          <p class="empty-day-copy">No activities on this day.</p>
+        </ng-template>
+      </div>
+
+      <div class="upcoming-card mat-elevation-z8">
+        <h4>Upcoming Activities</h4>
+        <div class="upcoming-list" *ngIf="upcomingActivities.length; else noUpcoming">
+          <div class="upcoming-item" *ngFor="let a of upcomingActivities" (click)="onEdit(a)">
+            <div class="upcoming-date-block">
+              <span class="ud-day">{{ a.start_time | date:'d' }}</span>
+              <span class="ud-month">{{ a.start_time | date:'MMM' }}</span>
+            </div>
+            <div class="upcoming-info">
+              <span class="ui-name">{{ a.activity_name }}</span>
+              <span class="ui-meta">{{ a.activity_type_display || a.activity_type }} &middot; {{ a.start_time | date:'shortTime' }}</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #noUpcoming>
+          <p class="empty-day-copy">Nothing scheduled yet.</p>
+        </ng-template>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<ng-template #addUpdateScheduleDialog>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>{{ isEditing ? 'Update Activity' : 'Schedule New Activity' }}</h2>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="grid-two">
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Activity Name</mat-label>
+          <input matInput formControlName="activity_name" placeholder="e.g. Ward Coordinators Meeting" />
+          <mat-error *ngIf="userForm.get('activity_name')?.touched && userForm.get('activity_name')?.invalid">
+            Valid activity name required.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="activity_type">
+            <mat-option *ngFor="let t of activityTypes" [value]="t.value">{{ t.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Start Time</mat-label>
+          <input matInput type="datetime-local" formControlName="start_time" />
+          <mat-error *ngIf="userForm.get('start_time')?.touched && userForm.get('start_time')?.invalid">
+            Start time is required.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>End Time</mat-label>
+          <input matInput type="datetime-local" formControlName="end_time" />
+          <mat-error *ngIf="userForm.get('end_time')?.touched && userForm.get('end_time')?.invalid">
+            End time is required.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" placeholder="Optional" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3" placeholder="Optional notes"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="reminder_sent">Reminder Sent</mat-slide-toggle>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" mat-button (click)="resetFormState(); closeDialog()">Cancel</button>
+        <button type="submit" mat-flat-button color="primary" [disabled]="userForm.invalid">
+          {{ isEditing ? 'Save Changes' : 'Schedule Activity' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #deleteScheduleDialog>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>Delete Activity</h2>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <h2 matDialogTitle>Are you sure you want to delete this activity?</h2>
+
+    <mat-dialog-actions align="end">
+      <button mat-button matDialogClose="no">No</button>
+      <button mat-button matDialogClose="yes" class="danger-btn">Yes</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template>
+
+</div>
