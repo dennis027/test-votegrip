@@ -40,7 +40,7 @@
 
   <section *ngFor="let pos of positions">
     <ng-container *ngIf="positionDataSources[pos] && positionDataSources[pos].data.length">
-      <h3 style="margin: 0 0 12px 0; text-transform: capitalize">{{ pos }}</h3>
+      <h3 style="margin: 0 0 12px 0; text-transform: capitalize">{{ positionLabels[pos] || pos }}</h3>
       <section class="table-panel mat-elevation-z8">
         <table mat-table [dataSource]="positionDataSources[pos]" class="candidate-table">
 
