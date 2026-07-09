@@ -29,7 +29,7 @@
   <ng-container *ngIf="!isLoading">
     <section *ngFor="let pos of positions">
       <ng-container *ngIf="positionDataSources[pos] && positionDataSources[pos].data.length">
-        <h3 class="position-label">{{ pos }}</h3>
+        <h3 class="position-label">{{ positionLabels[pos] || pos }}</h3>
         <section class="table-panel mat-elevation-z8">
           <table mat-table [dataSource]="positionDataSources[pos]" class="candidate-table">
 

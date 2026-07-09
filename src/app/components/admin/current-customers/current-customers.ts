@@ -34,7 +34,16 @@ export interface Candidate {
 export class CurrentCustomers implements OnDestroy {
 
   displayedColumns: string[] = ['first_name', 'last_name', 'email', 'phone', 'actions'];
-  positions: string[] = ['president', 'senator', 'mp', 'womenrep', 'mca', 'governor'];
+  positions: string[] = ['unassigned', 'president', 'senator', 'mp', 'womenrep', 'mca', 'governor'];
+  positionLabels: Record<string, string> = {
+    unassigned: 'Unassigned',
+    president: 'President',
+    senator: 'Senator',
+    mp: 'Member of Parliament',
+    womenrep: 'Women Representative',
+    mca: 'Member of County Assembly',
+    governor: 'Governor'
+  };
 
   positionLists: Record<string, Candidate[]> = {};
   positionDataSources: Record<string, MatTableDataSource<Candidate>> = {};
@@ -117,9 +126,12 @@ export class CurrentCustomers implements OnDestroy {
           if (!c || !c.profile) return;
 
           const status = c.profile.status?.toLowerCase().trim() ?? '';
-          let desired = c.profile.desired_position?.toLowerCase().trim() ?? null;
+          const rawDesired = c.profile.desired_position;
+          let desired = rawDesired?.toLowerCase().trim() ?? null;
 
-          if (desired) {
+          if (desired === null || desired === '') {
+            desired = 'unassigned';
+          } else {
             desired = positionMap[desired] ?? desired;
           }
 
