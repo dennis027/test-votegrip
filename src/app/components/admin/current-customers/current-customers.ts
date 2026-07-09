@@ -101,17 +101,33 @@ export class CurrentCustomers implements OnDestroy {
         this.positions.forEach(pos => this.positionLists[pos] = []);
         this.positionDataSources = {};
 
+        const positionMap: Record<string, string> = {
+          president: 'president',
+          senator: 'senator',
+          mp: 'mp',
+          mca: 'mca',
+          governor: 'governor',
+          'women representative': 'womenrep',
+          'women_rep': 'womenrep',
+          'women rep': 'womenrep',
+          'womenrepresentative': 'womenrep'
+        };
+
         candidates.forEach((c: any) => {
           if (!c || !c.profile) return;
 
           const status = c.profile.status?.toLowerCase().trim() ?? '';
           let desired = c.profile.desired_position?.toLowerCase().trim() ?? null;
 
-          if (desired === 'women representative' || desired === 'women_rep') desired = 'Women Representative';
+          if (desired) {
+            desired = positionMap[desired] ?? desired;
+          }
 
           // ← Only approved candidates
           if (status === 'approved' && desired && this.positions.includes(desired)) {
             this.positionLists[desired].push(c as Candidate);
+          } else if (status === 'approved' && desired) {
+            console.debug('Candidate skipped because position is unexpected:', desired, c);
           }
         });
 
