@@ -65,6 +65,8 @@ export class CurrentCustomers implements OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   constructor() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     afterNextRender(() => {
       const token =
         localStorage.getItem('access_token') ||
