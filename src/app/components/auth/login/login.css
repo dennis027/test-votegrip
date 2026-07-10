@@ -203,12 +203,19 @@ body {
 /* Back link */
 .back-link {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12.5px; font-weight: 500;
-  color: var(--ink-muted); text-decoration: none;
+  font-size: 13px; font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
   margin-bottom: 2rem;
-  transition: color 0.15s;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(2, 24, 78, 0.08);
+  transition: all 0.15s ease;
 }
-.back-link:hover { color: var(--accent); }
+.back-link:hover {
+  color: var(--accent-hover);
+  background: rgba(26,79,214,0.16);
+}
 .back-link svg { width: 13px; height: 13px; fill: currentColor; }
 
 /* Form header */
