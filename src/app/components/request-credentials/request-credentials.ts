@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // The new optimized dep
 import { finalize } from 'rxjs/operators';
 import { UsersService } from '../../services/users';
+import { ElectionTypesService } from '../../services/election-types-service';
 
 @Component({
   selector: 'app-request-credentials',
@@ -21,6 +22,8 @@ export class RequestCredentials implements OnInit {
   done = false;
   submittedEmail: string | null = null;
 
+  electionTypes: any[] = []; // Store fetched election types
+
   // UI Focus tracking
   firstFoc = false;
   lastFoc = false;
@@ -31,6 +34,7 @@ export class RequestCredentials implements OnInit {
   private fb = inject(FormBuilder);
   private usersService = inject(UsersService);
   private snackBar = inject(MatSnackBar);
+  private electionTypesService = inject(ElectionTypesService);
   private cdr = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef); // Required for clean cleanup
 
@@ -52,7 +56,11 @@ export class RequestCredentials implements OnInit {
       phone: ['', [Validators.required, Validators.pattern(/^[+\d\s\-()]{7,20}$/)]],
       desired_position: ['', [Validators.required]]
     });
+
+    this.getElectionTypes(); // Fetch election types on init
   }
+
+  
 
   // ── UI Helpers ──────────────────────────────────────────────────────────
   showSuccess(message: string): void {
@@ -74,61 +82,64 @@ export class RequestCredentials implements OnInit {
   }
 
   // ── Logic ────────────────────────────────────────────────────────────────
-  requestCredentials(): void {
-    this.submitted = true;
 
-    if (this.form.invalid) {
-      this.showError('Please fill in all fields correctly.');
-      return;
-    }
-
-    this.loading = true;
-
-    this.usersService
-      .requestLoginCred(this.form.value)
-      .pipe(
-        /**
-         * takeUntilDestroyed(this.destroyRef) is the key fix. 
-         * If Vite forces a reload while this request is pending, 
-         * this pipe will cancel the subscription immediately.
-         */
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => {
-          this.loading = false;
-          this.cdr.detectChanges();
-        })
-      )
-      .subscribe({
-        next: (res: any) => {
-          console.log('requestCredentials response:', res);
-          // If backend explicitly returned success:false, show error instead
-          if (res?.success === false) {
-            const msg = this.extractFirstErrorMessage(res) || res?.message || 'Request failed.';
-            this.showError(msg);
-            this.loading = false;
-            this.cdr.detectChanges();
-            return;
+  getElectionTypes(): void {
+    this.electionTypesService.getElectionTypes().subscribe({
+          next: (res: any) => {
+            this.electionTypes = res || [];
+          },
+          error: (err) => {
+            console.error('Error fetching election types:', err);
+            this.showError('Failed to fetch election types. Please try again later.');
           }
-
-          // Capture submitted email for display in success panel, then clear the form
-          this.submittedEmail = this.form.value?.email ?? null;
-          this.form.reset();
-          this.submitted = false;
-          this.done = true;
-          this.cdr.detectChanges();
-          this.showSuccess('Credentials request submitted! Check your email after some time.');
-          this.loading = false;
-        },
-        error: (err) => {
-          this.submitted = false;
-          const msg = this.extractFirstErrorMessage(err) || 'Request failed. Please try again.';
-          this.showError(msg);
-          this.loading = false;
-          this.cdr.detectChanges();
-        },
-      });
+        });
   }
 
+
+  requestCredentials(): void {
+  this.submitted = true;
+
+  if (this.form.invalid) {
+    this.showError('Please fill in all fields correctly.');
+    return;
+  }
+
+  this.loading = true;
+
+  this.usersService
+    .requestLoginCred(this.form.value)
+    .pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    )
+    .subscribe({
+      next: (res: any) => {
+        console.log('requestCredentials response:', res);
+
+        if (res?.success === false) {
+          const msg = this.extractFirstErrorMessage(res) || res?.message || 'Request failed.';
+          this.showError(msg);
+          return; // loading=false + detectChanges handled by finalize
+        }
+
+        this.submittedEmail = this.form.value?.email ?? null;
+        this.form.reset();
+        this.submitted = false;
+        this.done = true;
+        this.showSuccess('Credentials request submitted! Check your email after some time.');
+        // no manual loading/detectChanges here — finalize() handles it
+      },
+      error: (err) => {
+        this.submitted = false;
+        const msg = this.extractFirstErrorMessage(err) || 'Request failed. Please try again.';
+        this.showError(msg);
+        // no manual loading/detectChanges here — finalize() handles it
+      },
+    });
+}
   private extractFirstErrorMessage(err: any): string | null {
     let e = err?.error;
     if (!e) return err?.message ?? null;

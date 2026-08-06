@@ -19,7 +19,6 @@ export class TrainingService {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   private get headers(): HttpHeaders {
