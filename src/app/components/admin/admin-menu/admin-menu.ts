@@ -54,8 +54,8 @@ export class AdminMenu {
         group: 'Admin Roles',
         type: 'default',
         items: [
+          { name: 'Onboard Candidates',         route: '/admin-menu/manage-candidates',   icon: 'map' },
           { name: 'Current Customers',          route: '/admin-menu/current-customers',     icon: 'users' },
-          { name: 'Manage Candidates',          route: '/admin-menu/manage-candidates',   icon: 'map' },
           { name: 'Manage Training',            route: '/admin-menu/manage-training',   icon: 'book' },
           { name: 'Readiness',                  route: '/admin-menu/readiness',  icon: 'checklist' },
           { name: 'Communication',              route: '/admin-menu/messages',   icon: 'chat' },

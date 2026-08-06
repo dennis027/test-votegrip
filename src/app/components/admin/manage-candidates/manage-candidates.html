@@ -33,51 +33,56 @@
     />
   </div>
 
-  <div *ngIf="!hasAnyData" class="empty-state" style="text-align:center; padding:48px 12px; color:#64748b;">
+  <div *ngIf="loadingElectionTypes" class="empty-state" style="text-align:center; padding:48px 12px; color:#64748b;">
+    <h3>Loading…</h3>
+    <p>Fetching election position types.</p>
+  </div>
+
+  <div *ngIf="!loadingElectionTypes && !hasAnyData" class="empty-state" style="text-align:center; padding:48px 12px; color:#64748b;">
     <h3>No data for now</h3>
     <p>Please wait — registered candidate data will appear here shortly.</p>
   </div>
 
-  <section *ngFor="let pos of positions">
+  <section *ngFor="let pos of renderedPositions">
     <ng-container *ngIf="positionDataSources[pos] && positionDataSources[pos].data.length">
-      <h3 style="margin: 0 0 12px 0; text-transform: capitalize">{{ positionLabels[pos] || pos }}</h3>
+      <h3 style="margin: 0 0 12px 0;">{{ positionLabels[pos] || pos }}</h3>
       <section class="table-panel mat-elevation-z8">
         <table mat-table [dataSource]="positionDataSources[pos]" class="candidate-table">
 
-      <!-- First Name Column -->
-      <ng-container matColumnDef="first_name">
-        <th mat-header-cell *matHeaderCellDef> First Name </th>
-        <td mat-cell *matCellDef="let candidate"> {{candidate.first_name}} </td>
-      </ng-container>
+          <!-- First Name Column -->
+          <ng-container matColumnDef="first_name">
+            <th mat-header-cell *matHeaderCellDef> First Name </th>
+            <td mat-cell *matCellDef="let candidate"> {{candidate.first_name}} </td>
+          </ng-container>
 
-      <!-- Last Name Column -->
-      <ng-container matColumnDef="last_name">
-        <th mat-header-cell *matHeaderCellDef> Last Name </th>
-        <td mat-cell *matCellDef="let candidate"> {{candidate.last_name}} </td>
-      </ng-container>
+          <!-- Last Name Column -->
+          <ng-container matColumnDef="last_name">
+            <th mat-header-cell *matHeaderCellDef> Last Name </th>
+            <td mat-cell *matCellDef="let candidate"> {{candidate.last_name}} </td>
+          </ng-container>
 
-      <!-- Email Column -->
-      <ng-container matColumnDef="email">
-        <th mat-header-cell *matHeaderCellDef> Email </th>
-        <td mat-cell *matCellDef="let candidate"> {{candidate.email}} </td>
-      </ng-container>
+          <!-- Email Column -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let candidate"> {{candidate.email}} </td>
+          </ng-container>
 
-      <!-- Phone Column -->
-      <ng-container matColumnDef="phone">
-        <th mat-header-cell *matHeaderCellDef> Phone </th>
-        <td mat-cell *matCellDef="let candidate"> {{candidate.phone}} </td>
-      </ng-container>
+          <!-- Phone Column -->
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef> Phone </th>
+            <td mat-cell *matCellDef="let candidate"> {{candidate.phone}} </td>
+          </ng-container>
 
-      <!-- Actions Column -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef> Actions </th>
-        <td mat-cell *matCellDef="let candidate">
-          <div class="action-buttons">
-            <button mat-raised-button class="btn-approve" (click)="approveCandidate(candidate)">Approve</button>
-            <button mat-raised-button class="btn-reject" (click)="rejectCandidate(candidate)">Reject</button>
-          </div>
-        </td>
-      </ng-container>
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let candidate">
+              <div class="action-buttons">
+                <button mat-raised-button class="btn-approve" (click)="approveCandidate(candidate)">Approve</button>
+                <button mat-raised-button class="btn-reject" (click)="rejectCandidate(candidate)">Reject</button>
+              </div>
+            </td>
+          </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

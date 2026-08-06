@@ -12,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { ElectionTypesService } from '../../../services/election-types-service';
 
 export interface Candidate {
   id: string;
@@ -19,12 +20,22 @@ export interface Candidate {
   last_name: string;
   email: string;
   phone: string;
-  is_verified: boolean;
-  profile?: {
-    status?: string;
-    desired_position?: string | null;
+  is_verified?: boolean;
+  status?: string;
+  rejection_reason?: string | null;
+  desired_position?: {
+    id: string;
+    name?: string | null;
   } | null;
 }
+
+export interface ElectionType {
+  id: string;
+  name: string;
+  scope_display: string;
+}
+
+const UNASSIGNED_KEY = 'unassigned';
 
 @Component({
   selector: 'app-manage-candidates',
@@ -36,16 +47,10 @@ export interface Candidate {
 export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
 
   displayedColumns: string[] = ['first_name', 'last_name', 'email', 'phone', 'actions'];
-  positions: string[] = ['unassigned', 'president', 'senator', 'mp', 'womenrep', 'mca', 'governor'];
-  positionLabels: Record<string, string> = {
-    unassigned: 'Unassigned',
-    president: 'President',
-    senator: 'Senator',
-    mp: 'Member of Parliament',
-    womenrep: 'Women Representative',
-    mca: 'Member of County Assembly',
-    governor: 'Governor'
-  };
+
+  // Dynamic, built from electionTypes once fetched (plus a fallback 'unassigned' bucket)
+  positions: string[] = [];
+  positionLabels: Record<string, string> = {};
 
   positionLists: Record<string, Candidate[]> = {};
   positionDataSources: Record<string, MatTableDataSource<Candidate>> = {};
@@ -68,6 +73,7 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
   destroyed = false;
   searchTerm = '';
   hasAnyData = false;
+  loadingElectionTypes = false;
 
   private route = inject(Router);
   private userService = inject(UsersService);
@@ -75,9 +81,12 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
   private dialog = inject(MatDialog);
+  private electionTypesService = inject(ElectionTypesService);
+
   @ViewChild('rejectDialog') rejectDialogTpl!: TemplateRef<any>;
   currentRejectCandidate?: Candidate;
   rejectReason = '';
+  electionTypes: ElectionType[] = [];
   private activeDialogRef?: MatDialogRef<any>;
 
   ngOnInit() {
@@ -90,81 +99,76 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.loadCandidates();
+    this.loadingElectionTypes = true;
+    this.electionTypesService.getElectionTypes().subscribe({
+      next: (res: any) => {
+        this.electionTypes = res || [];
+        this.buildPositionMeta();
+        this.loadingElectionTypes = false;
+        this.loadCandidates();
+      },
+      error: (err) => {
+        console.error('Error fetching election types:', err);
+        this.showError('Failed to fetch election types. Please try again later.');
+        // Still build an 'unassigned'-only bucket so the page remains usable
+        this.electionTypes = [];
+        this.buildPositionMeta();
+        this.loadingElectionTypes = false;
+        this.loadCandidates();
+      }
+    });
   }
 
   ngAfterViewInit() {
     // no-op: paginator wiring handled via ViewChildren setter
   }
 
-  loadCandidates() {
-    if (!isPlatformBrowser(this.platformId)) return; // belt-and-suspenders
+  /** Builds positions[] and positionLabels{} from fetched election types + a fallback bucket. */
+  private buildPositionMeta(): void {
+    this.positionLabels = {};
+    this.positions = [];
 
-    this.userService.getUsersList('candidate', null).subscribe({
-      next: (response) => {
+    this.electionTypes.forEach((et) => {
+      this.positions.push(et.id);
+      this.positionLabels[et.id] = `${et.name} (${et.scope_display})`;
+    });
+
+    // Bucket for candidates whose desired_position.id doesn't match any known election type
+    this.positions.push(UNASSIGNED_KEY);
+    this.positionLabels[UNASSIGNED_KEY] = 'Unassigned';
+  }
+
+  loadCandidates() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.userService.getOnboardingCandidates().subscribe({
+      next: (response: any) => {
         console.log('Raw API Response on Reload:', response);
 
-        let candidates: any[] = [];
-        if (response && response.data && Array.isArray(response.data)) {
+        let candidates: Candidate[] = [];
+        if (response?.data && Array.isArray(response.data)) {
           candidates = response.data;
         } else if (Array.isArray(response)) {
           candidates = response;
-        } else if (response && typeof response === 'object') {
-          const keys = Object.keys(response);
-          const arrayKey = keys.find(k => Array.isArray((response as any)[k]));
-          if (arrayKey) candidates = (response as any)[arrayKey];
         }
 
+        // Reset local data structures
+        this.positionLists = {};
         this.positions.forEach(pos => this.positionLists[pos] = []);
         this.positionDataSources = {};
 
-        const positionMap: Record<string, string> = {
-          president: 'president',
-          senator: 'senator',
-          mp: 'mp',
-          mca: 'mca',
-          governor: 'governor',
-          'women representative': 'womenrep',
-          'women_rep': 'womenrep',
-          'women rep': 'womenrep',
-          'womenrepresentative': 'womenrep'
-        };
+        candidates.forEach((c) => {
+          if (!c) return;
 
-        candidates.forEach((c: any) => {
-          if (!c || !c.profile) return;
+          const posId = c.desired_position?.id;
+          const key = (posId && this.positionLists.hasOwnProperty(posId)) ? posId : UNASSIGNED_KEY;
 
-          const status = c.profile.status ? c.profile.status.toLowerCase().trim() : '';
-          const rawDesired = c.profile.desired_position;
-          let desired = rawDesired?.toLowerCase().trim() ?? null;
-
-          if (!desired) {
-            desired = 'unassigned';
-          } else {
-            desired = positionMap[desired] ?? desired;
-          }
-
-          if (status === 'registered' && desired && this.positions.includes(desired)) {
-            this.positionLists[desired].push(c as Candidate);
-          }
+          this.positionLists[key].push(c);
         });
 
-        this.positions.forEach(pos => {
-          const list = this.positionLists[pos] || [];
-          if (list.length > 0) {
-            this.positionDataSources[pos] = new MatTableDataSource<Candidate>(list);
-          }
-        });
-
-        this.hasAnyData = Object.keys(this.positionDataSources).some(
-          k => this.positionDataSources[k]?.data.length > 0
-        );
-
-        this.renderedPositions = this.positions.filter(
-          pos => this.positionDataSources[pos]?.data.length > 0
-        );
+        this.rebuildDataSources();
 
         console.log('Processed structure positions:', this.renderedPositions);
-        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error fetching candidates on reload:', error);
@@ -176,6 +180,29 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+  }
+
+  /** Rebuilds positionDataSources / renderedPositions / hasAnyData from positionLists. */
+  private rebuildDataSources(): void {
+    this.positionDataSources = {};
+
+    this.positions.forEach(pos => {
+      const list = this.positionLists[pos] || [];
+      if (list.length > 0) {
+        this.positionDataSources[pos] = new MatTableDataSource<Candidate>(list);
+      }
+    });
+
+    this.hasAnyData = Object.keys(this.positionDataSources).some(
+      k => this.positionDataSources[k]?.data.length > 0
+    );
+
+    this.renderedPositions = this.positions.filter(
+      pos => this.positionDataSources[pos]?.data.length > 0
+    );
+
+    if (this.latestPaginatorsQL) this.wirePaginators(this.latestPaginatorsQL);
+    this.cdr.detectChanges();
   }
 
   private wirePaginators(ql: QueryList<MatPaginator>) {
@@ -239,7 +266,6 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
   }
 
   rejectCandidate(candidate: Candidate) {
-    // open inline dialog template to capture rejection reason
     this.currentRejectCandidate = candidate;
     this.rejectReason = '';
     this.activeDialogRef = this.dialog.open(this.rejectDialogTpl, { width: '520px' });

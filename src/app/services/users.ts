@@ -14,6 +14,7 @@ export class UsersService {
     private usersApi                = `${environment.apiUrl}/${environment.apiVersion}/auth/users/?`;
     private approveCandidateUrl         = `${environment.apiUrl}/${environment.apiVersion}/auth/candidates/`;
     private rejectCandidateUrl          = `${environment.apiUrl}/${environment.apiVersion}/auth/candidates/`
+    private getOnboardingCandidatesUrl     = `${environment.apiUrl}/${environment.apiVersion}/auth/candidates/registrations/`;
 
     constructor(
     private http: HttpClient,
@@ -47,6 +48,18 @@ export class UsersService {
       : new HttpHeaders({ 'Content-Type': 'application/json' });
 
     return this.http.get<any>(url, { headers });
+  }
+
+  getOnboardingCandidates(): Observable<any> {
+    
+    const headers = this.authService.getAccessToken()
+      ? new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.authService.getAccessToken()}`
+        })
+      : new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.get<any>(this.getOnboardingCandidatesUrl, { headers });
   }
 
   approveCandidate(candidateId: string | number): Observable<any> {
