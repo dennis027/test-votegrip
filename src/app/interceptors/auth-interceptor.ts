@@ -11,23 +11,28 @@ export class AuthInterceptor implements HttpInterceptor {
   private router = inject(Router);
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authService.getAccessToken();
-
-    // Don't attach Authorization header for known unauthenticated endpoints
     const unauthenticatedPaths = [
-      '/auth/candidates/register'
+      '/auth/candidates/register',
+      '/election/currenttypes'
     ];
 
     const shouldSkipAuth = unauthenticatedPaths.some(p => req.url.includes(p));
 
-    const cloned = (token && !shouldSkipAuth)
-      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-      : req;
+    let cloned = req;
+
+    if (shouldSkipAuth) {
+      // Explicitly strip Authorization in case another interceptor already added it
+      cloned = req.clone({ headers: req.headers.delete('Authorization') });
+    } else {
+      const token = this.authService.getAccessToken();
+      if (token) {
+        cloned = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+      }
+    }
 
     return next.handle(cloned).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          // Token invalid or expired
+        if (error.status === 401 && !shouldSkipAuth) {
           this.authService.logout();
           this.router.navigateByUrl('login', { replaceUrl: true });
         }

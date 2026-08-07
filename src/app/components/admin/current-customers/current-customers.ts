@@ -194,6 +194,7 @@ export class CurrentCustomers implements OnInit, OnDestroy {
   }
 
   private rebuildDataSources(): void {
+    
     this.positionDataSources = {};
 
     this.positions.forEach(pos => {
@@ -215,14 +216,17 @@ export class CurrentCustomers implements OnInit, OnDestroy {
   }
 
   private wirePaginators(ql: QueryList<MatPaginator>) {
-    if (!ql || ql.length === 0) return;
-    ql.toArray().forEach((p, idx) => {
+     ql.toArray().forEach((p, idx) => {
       const pos = this.renderedPositions[idx];
+
       if (pos && this.positionDataSources[pos]) {
         this.positionDataSources[pos].paginator = p;
       }
     });
-    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    });
   }
 
   ngOnDestroy() {

@@ -19,10 +19,13 @@ export const appConfig: ApplicationConfig = {
           const platformId = inject(PLATFORM_ID);
 
           // Don't attach Authorization for unauthenticated endpoints
-          const unauthenticatedPaths = ['/auth/candidates/register'];
+          const unauthenticatedPaths = [
+            '/auth/candidates/register',
+            '/election/currenttypes'
+          ];
           const shouldSkipAuth = unauthenticatedPaths.some(p => req.url.includes(p));
 
-          // ✅ Only access localStorage in the browser
+          //  Only access localStorage in the browser
           if (isPlatformBrowser(platformId) && !shouldSkipAuth) {
             const token = localStorage.getItem('access_token');
             if (token) {

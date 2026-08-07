@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
-import { HttpHeaders } from '@angular/common/http';
 
 // Define a model for better type safety
 export interface ElectionType {
@@ -23,7 +22,6 @@ export class ElectionTypesService {
 
   
   getElectionTypes(): Observable<any[]> {
-    const headers = new HttpHeaders().set('X-Bypass-Auth', 'true');
-    return this.http.get<ElectionType[]>(this.electionTypesAPI,{ headers });
+    return this.http.get<ElectionType[]>(this.electionTypesAPI);
   }
 }
