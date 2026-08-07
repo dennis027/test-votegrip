@@ -85,26 +85,21 @@ export class Login implements OnInit {
     )
     .subscribe({
       next: (res) => {
-        console.log('Login response:', res);
         
         // Check if device is verified (known device)
         if (res.data.verified) {
-          console.log('Device verified - navigating to dashboard');
           const role = res.data.user.role.name;
           const dashboardRoute = role === 'admin' ? 'admin-menu/admin-dashboard' : 'main-menu/dashboard';
           this.route.navigate([dashboardRoute]).then(success => {
-            console.log('Navigation success:', success);
           });
           this.showSuccess('Login successful! Welcome to the dashboard.');
         } else {
           // New device detected - requires 2FA
-          console.log('New device - redirecting to 2FA');
           this.route.navigate(['/two-factor-auth']);
           this.showSuccess('New device detected. Please enter the 2FA code sent to your email.');
         }
       },
       error: (err) => {
-        console.error('Login error:', err);
         this.isLoading = false;
 
         if (err.status === 401) {

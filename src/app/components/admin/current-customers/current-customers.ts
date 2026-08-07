@@ -107,7 +107,6 @@ export class CurrentCustomers implements OnInit, OnDestroy {
         this.loadCandidates();
       },
       error: (err) => {
-        console.error('Error fetching election types:', err);
         this.showError('Failed to fetch election types. Please try again later.');
         this.electionTypes = [];
         this.loadingElectionTypes = false;
@@ -181,7 +180,6 @@ export class CurrentCustomers implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error fetching candidates:', error);
         this.isLoading = false;
         if (error.status === 401) {
           this.showError('Session expired. Please log in again.');

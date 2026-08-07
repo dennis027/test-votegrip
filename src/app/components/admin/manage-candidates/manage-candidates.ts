@@ -108,7 +108,6 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
         this.loadCandidates();
       },
       error: (err) => {
-        console.error('Error fetching election types:', err);
         this.showError('Failed to fetch election types. Please try again later.');
         // Still build an 'unassigned'-only bucket so the page remains usable
         this.electionTypes = [];
@@ -143,7 +142,6 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
 
     this.userService.getOnboardingCandidates().subscribe({
       next: (response: any) => {
-        console.log('Raw API Response on Reload:', response);
 
         let candidates: Candidate[] = [];
         if (response?.data && Array.isArray(response.data)) {
@@ -168,10 +166,8 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
 
         this.rebuildDataSources();
 
-        console.log('Processed structure positions:', this.renderedPositions);
       },
       error: (error) => {
-        console.error('Error fetching candidates on reload:', error);
         if (error.status === 401) {
           this.showError('Session expired. Please log in again.');
           this.route.navigate(['login']);
@@ -259,7 +255,6 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
         this.removeCandidateFromPosition(candidate.id);
       },
       error: (error) => {
-        console.error('Approve Error:', error);
         this.showError('Failed to approve candidate.');
       }
     });
@@ -281,7 +276,6 @@ export class ManageCandidates implements OnInit, AfterViewInit, OnDestroy {
           this.removeCandidateFromPosition(candidate.id);
         },
         error: (error) => {
-          console.error('Reject Error:', error);
           this.showError('Failed to reject candidate.');
         }
       });

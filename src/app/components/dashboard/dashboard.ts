@@ -5,7 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth/auth';
 import { Router } from '@angular/router';
 import { GeographicalService } from '../../services/geographical-service';
-import { get } from 'http';
+import { TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,6 +23,9 @@ export class Dashboard {
   private router = inject(Router);
   private geographicalService = inject(GeographicalService);
   private platformId = inject(PLATFORM_ID);
+  private dialog = inject(MatDialog);
+
+  @ViewChild('callAPIDialog') callAPIDialog!: TemplateRef<any>;
 
   // name variable to hold the user's name
   name = 'Candidate';

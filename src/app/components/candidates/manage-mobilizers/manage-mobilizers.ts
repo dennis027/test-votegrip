@@ -193,7 +193,6 @@ addUpdateDialC() {
 
   onEdit(mobilizer: any) {
     this.isEditing = true;
-    console.log('Editing mobilizer:', mobilizer);
     this.currentMobilizerId = mobilizer.id || null;
     // Populate form with existing data
     this.userForm.patchValue({

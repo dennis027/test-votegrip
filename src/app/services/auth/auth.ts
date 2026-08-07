@@ -33,7 +33,6 @@ export class AuthService {
   private setItem(key: string, value: string): void {
     if (this.isBrowser()) {
       localStorage.setItem(key, value);
-      console.log(`✅ Stored ${key}`);
     }
   }
 
@@ -66,7 +65,6 @@ export class AuthService {
       this.removeItem('access_token');
       this.removeItem('refresh_token');
       this.removeItem('pending_token');
-      console.log('🗑️ Session cleared');
     }
   }
 
@@ -86,29 +84,23 @@ export class AuthService {
       channel: payload.channel || 'email'
     };
 
-    console.log('📤 Sending login with device_id:', deviceId);
 
     return this.http.post<any>(this.loginAPI, loginPayload, {
       headers: this.jsonHeaders()
     }).pipe(
       tap((response) => {
-        console.log('📥 Login response received:', response);
 
         // CASE 1: Known device - verified = true
         if (response?.data?.verified === true) {
-          console.log('✅ Device verified = true');
           const accessToken = response?.data?.access;
           const refreshToken = response?.data?.refresh;
 
-          console.log('Access token:', accessToken ? '✅ exists' : '❌ missing');
-          console.log('Refresh token:', refreshToken ? '✅ exists' : '❌ missing');
 
           if (accessToken) this.setItem('access_token', accessToken);
           if (refreshToken) this.setItem('refresh_token', refreshToken);
         }
         // CASE 2: New device - requires OTP
         else if (response?.data?.requires_otp === true || response?.data?.verified === false) {
-          console.log('⏳ New device - requires OTP');
           const pendingToken = response?.data?.pending_token;
           if (pendingToken) {
             this.setItem('pending_token', pendingToken);
@@ -136,13 +128,11 @@ export class AuthService {
       device_id: deviceId
     };
 
-    console.log('📤 2FA verify with device_id:', deviceId);
 
     return this.http.post<any>(this.verify2FaUrl, payload, {
       headers: this.jsonHeaders()
     }).pipe(
       tap((response) => {
-        console.log('📥 2FA response:', response);
         const accessToken = response?.data?.access;
         const refreshToken = response?.data?.refresh;
 

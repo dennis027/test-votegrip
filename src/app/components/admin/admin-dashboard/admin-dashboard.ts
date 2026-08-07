@@ -131,7 +131,6 @@ export class AdminDashboard {
   ];
 
   performAction(actionId: string) {
-    console.log('Performing admin action:', actionId);
     // Implement action logic
   }
 

@@ -141,7 +141,6 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
         this.showSuccess('A new 2FA code has been sent to your email.');
       },
       error: (err) => {
-        console.error('Failed to resend 2FA code:', err);
         this.showError('Failed to resend code. Please try again later.');
       }
     });
@@ -166,7 +165,6 @@ export class TwoFactorAuth implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        console.error('2FA verification failed:', err);
         this.errorMessage.set(
           err?.error?.message || 'Invalid code. Please try again.'
         );

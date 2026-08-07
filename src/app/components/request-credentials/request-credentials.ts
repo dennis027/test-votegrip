@@ -89,7 +89,6 @@ export class RequestCredentials implements OnInit {
             this.electionTypes = res || [];
           },
           error: (err) => {
-            console.error('Error fetching election types:', err);
             this.showError('Failed to fetch election types. Please try again later.');
           }
         });
@@ -117,7 +116,6 @@ export class RequestCredentials implements OnInit {
     )
     .subscribe({
       next: (res: any) => {
-        console.log('requestCredentials response:', res);
 
         if (res?.success === false) {
           const msg = this.extractFirstErrorMessage(res) || res?.message || 'Request failed.';

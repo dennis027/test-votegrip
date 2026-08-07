@@ -117,7 +117,6 @@ export class ManageAgents implements OnInit {
     this.authService.getProfile().subscribe({
       next: (profile: any) => {
         this.agentId = profile?.data.id;
-        console.log('Profile loaded, agent ID:', this.agentId);
         this. getUserAgents()
       },
       error: () => {
@@ -144,7 +143,6 @@ getUserAgents() {
       next: (response: any) => {
         const candidates = Array.isArray(response) ? response : (response.data || []);
         this.dataSource.data = candidates;
-        console.log('Agents loaded:', this.dataSource.data);
       },
       error: (error) => {
         // 1. Check for the nested backend error message
