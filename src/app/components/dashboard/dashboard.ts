@@ -4,9 +4,11 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth/auth';
 import { Router } from '@angular/router';
+import { GeographicalService } from '../../services/geographical-service';
+import { get } from 'http';
 
 @Component({
-  selector: 'app-dashboard',  
+  selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './dashboard.html',
@@ -18,38 +20,156 @@ export class Dashboard {
   private cdr      = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private geographicalService = inject(GeographicalService);
   private platformId = inject(PLATFORM_ID);
-
 
   // name variable to hold the user's name
   name = 'Candidate';
 
+  agentsNumber = 0;
+  mobilizersNumber = 0;
+
+  // True until the profile call resolves — template can show a skeleton/placeholder
+  statsLoading = true;
+
+  counties: any[] = [];
+  constituencies: any[] = [];
+  wards: any[] = [];
 
   ngOnInit(): void {
-    // Simulate loading data
+    if (!isPlatformBrowser(this.platformId)) return;
 
-  if (isPlatformBrowser(this.platformId)) {
-    setTimeout(() => {
-      this.authService.getProfile().subscribe({
-        next: (profile) => {
-          console.log('User profile:', profile.data.full_name);
-          this.showSuccess('Welcome back, ' + profile.data.full_name + '!');
-          this.name = profile.data.full_name;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error('Failed to load profile:', err);
-          this.showError('Failed to load user profile. Please try again later.');
+    this.getConstituencies();
+    this.getCounties();
+    this.getWards();
 
-          if (err.status === 401) {
-            this.showError('Session expired. Please log in again.');
-            this.router.navigate(['login']);
-          }
+    this.authService.getProfile().subscribe({
+      next: (profile) => {
+        const fullName = profile?.data?.full_name ?? 'Candidate';
+        const agents = profile?.data?.profile?.agents_summary?.total ?? 0;
+        const mobilizers = profile?.data?.profile?.mobilizers_count ?? 0;
+        const ElectionStatus = profile?.data?.profile?.elections
+
+        if ((ElectionStatus).length === 0) {
+          console.table('No elections found in profile data. Defaulting to 0 for agents and mobilizers.');
         }
-      });
-    }, 1000);
 
+        this.name = fullName;
+        this.agentsNumber = agents;
+        this.mobilizersNumber = mobilizers;
+
+        // Reflect the real name in the candidate card
+        this.candidate = {
+          ...this.candidate,
+          name: fullName,
+          initials: this.getInitials(fullName),
+        };
+
+        // Rebuild stats now that real numbers are available
+        this.stats = [
+          {
+            label: 'Total Agents',
+            value: agents,
+            sub: '28 pending approval',
+            icon: 'agents',
+            color: 'blue',
+            trend: '+14',
+            trendUp: true,
+          },
+          {
+            label: 'Total Mobilizers',
+            value: mobilizers,
+            sub: 'of 301 total',
+            icon: 'stations',
+            color: 'green',
+            trend: '82%',
+            trendUp: true,
+          },
+          {
+            label: 'Readiness Score',
+            value: '76%',
+            sub: '3 regions below threshold',
+            icon: 'score',
+            color: 'amber',
+            trend: '+4%',
+            trendUp: true,
+          },
+          {
+            label: 'Open Incidents',
+            value: '5',
+            sub: '2 high severity',
+            icon: 'incidents',
+            color: 'red',
+            trend: '-2',
+            trendUp: false,
+          },
+        ];
+
+        this.statsLoading = false;
+        this.showSuccess('Welcome back, ' + fullName + '!');
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to load profile:', err);
+        this.statsLoading = false;
+
+        if (err.status === 401) {
+          this.showError('Session expired. Please log in again.');
+          this.router.navigate(['login']);
+        } else {
+          this.showError('Failed to load user profile. Please try again later.');
+        }
+        this.cdr.markForCheck();
+      }
+    });
   }
+
+  getCounties(): void {
+    this.geographicalService.getCounties().subscribe({
+      next: (counties) => {
+        this.counties = counties;
+        this.cdr.markForCheck();
+        console.log('Counties loaded:', counties);
+      },
+      error: (err) => {
+        console.error('Failed to load counties:', err);
+      }
+    });
+  }
+
+  getConstituencies(): void {
+    this.geographicalService.getConstituencies().subscribe({
+      next: (constituencies) => {
+        this.constituencies = constituencies;
+        this.cdr.markForCheck();
+        console.log('Constituencies loaded:', constituencies);
+      },
+      error: (err) => {
+        console.error('Failed to load constituencies:', err);
+      }
+    });
+  }
+
+  getWards(): void {
+    this.geographicalService.getWards().subscribe({
+      next: (wards) => {
+        this.wards = wards;
+        this.cdr.markForCheck();
+        console.log('Wards loaded:', wards);
+      },
+      error: (err) => {
+        console.error('Failed to load wards:', err);
+      }
+    });
+  }
+
+  private getInitials(fullName: string): string {
+    return fullName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(part => part[0]?.toUpperCase())
+      .join('');
   }
 
   showSuccess(message: string) {
@@ -70,6 +190,7 @@ export class Dashboard {
     });
   }
 
+  // Placeholder until party/constituency/county/electionDate are exposed by the API
   candidate = {
     name: 'James Kariuki',
     initials: 'JK',
@@ -86,44 +207,16 @@ export class Dashboard {
     progress: 38,
   };
 
-  stats = [
-    {
-      label: 'Total Agents',
-      value: '312',
-      sub: '28 pending approval',
-      icon: 'agents',
-      color: 'blue',
-      trend: '+14',
-      trendUp: true,
-    },
-    {
-      label: 'Stations Covered',
-      value: '247',
-      sub: 'of 301 total',
-      icon: 'stations',
-      color: 'green',
-      trend: '82%',
-      trendUp: true,
-    },
-    {
-      label: 'Readiness Score',
-      value: '76%',
-      sub: '3 regions below threshold',
-      icon: 'score',
-      color: 'amber',
-      trend: '+4%',
-      trendUp: true,
-    },
-    {
-      label: 'Open Incidents',
-      value: '5',
-      sub: '2 high severity',
-      icon: 'incidents',
-      color: 'red',
-      trend: '-2',
-      trendUp: false,
-    },
-  ];
+  // Empty until the profile response arrives — populated in ngOnInit's next handler
+  stats: Array<{
+    label: string;
+    value: string | number;
+    sub: string;
+    icon: string;
+    color: string;
+    trend: string;
+    trendUp: boolean;
+  }> = [];
 
   readiness = [
     { region: 'Nairobi Central',  score: 94, agents: 48,  color: 'green' },
