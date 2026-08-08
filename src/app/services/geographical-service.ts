@@ -10,8 +10,9 @@ export class GeographicalService {
   
   private readonly baseUrl = environment.apiUrl.replace(/\/$/, '');
   private  countyAPI                   = `${this.baseUrl}/${environment.apiVersion}/election/counties/`;
-  private  constituenciesAPI           = `${this.baseUrl}/${environment.apiVersion}/election/constituencies/`;
-  private  wardsAPI                    = `${this.baseUrl}/${environment.apiVersion}/election/wards/`;
+  private  constituenciesAPI           = `${this.baseUrl}/${environment.apiVersion}/election/constituencies/?`;
+  private  wardsAPI                    = `${this.baseUrl}/${environment.apiVersion}/election/wards/?`;
+  private  politicalPartiesAPI         = `${this.baseUrl}/${environment.apiVersion}/election/parties/`;
 
 
     constructor(private http: HttpClient) {}
@@ -21,11 +22,15 @@ export class GeographicalService {
       return this.http.get<any[]>(this.countyAPI);
     }
 
-    getConstituencies(): Observable<any[]> {
-      return this.http.get<any[]>(this.constituenciesAPI);
+    getConstituencies(county:any): Observable<any[]> {
+      return this.http.get<any[]>(this.constituenciesAPI+'county_name='+county);
     }
 
-    getWards(): Observable<any[]> {
-      return this.http.get<any[]>(this.wardsAPI );
+    getWards(constituency:any): Observable<any[]> {
+      return this.http.get<any[]>(this.wardsAPI+'constituency_name='+constituency);
+    }
+
+    getPoliticalParties(): Observable<any[]> {
+      return this.http.get<any[]>(this.politicalPartiesAPI);
     }
 }
