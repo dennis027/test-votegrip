@@ -1,1 +1,39 @@
-<p>assign-polling-station works!</p>
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource">
+
+    <ng-container matColumnDef="polling_station_code">
+      <th mat-header-cell *matHeaderCellDef> Code. </th>
+      <td mat-cell *matCellDef="let element"> {{element.polling_station_code}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="polling_station_name">
+      <th mat-header-cell *matHeaderCellDef> Station Name </th>
+      <td mat-cell *matCellDef="let element"> {{element.polling_station_name}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="station_type">
+      <th mat-header-cell *matHeaderCellDef> Station Type </th>
+      <td mat-cell *matCellDef="let element"> {{element.station_type}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="assigned_to">
+      <th mat-header-cell *matHeaderCellDef> Assigned To </th>
+      <td mat-cell *matCellDef="let element"> {{element.assigned_to}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-button color="primary" (click)="assignPollingStation(element)">Assign</button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                 showFirstLastButtons 
+                 aria-label="Select page of periodic elements">
+  </mat-paginator>
+</div>
