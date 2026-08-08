@@ -68,6 +68,9 @@ export class Dashboard {
   matchedPositionType: any = null;
   geographyLevel: GeographyLevel = null;
 
+  candidatePoliticalParty: any = null;
+  candidateLocation: any = null;
+
   selectedCounty: any = null;
   selectedConstituency: any = null;
   selectedWard: any = null;
@@ -100,7 +103,35 @@ export class Dashboard {
         const mobilizers = profile?.data?.profile?.mobilizers_count ?? 0;
         const elections = profile?.data?.profile?.elections ?? [];
 
-        this.profileDesiredPosition = profile?.data?.profile?.desired_position ?? null;
+      this.profileDesiredPosition = profile?.data?.profile?.desired_position ?? null;
+
+      console.log('Election Details:', profile?.data?.profile?.elections);
+
+      this.candidatePoliticalParty =profile?.data?.profile?.elections?.[0]?.political_party.name ?? null;
+
+     const election = profile?.data?.profile?.elections?.[0] ?? null;
+
+    this.candidateLocation = election;
+
+    if (this.candidateLocation) {
+      const { county, constituency, ward } = this.candidateLocation;
+
+      if (county && constituency && ward) {
+        // WANGU Ward
+        this.candidateLocation = `${ward} Ward`;
+      } else if (county && constituency) {
+        // KIHARU Constituency
+        this.candidateLocation = `${constituency} Constituency`;
+      } else if (county) {
+        // Murang'a County
+        this.candidateLocation = `${county} County`;
+      } else {
+        // No location => Presidential
+        this.candidateLocation = 'Presidential';
+      }
+    }  
+      console.log('Candidate Political Party:', this.candidatePoliticalParty);
+
 
       this.currentUserId = profile.data?.id;
 
@@ -110,8 +141,6 @@ export class Dashboard {
 
         this.candidate = {
           ...this.candidate,
-          name: fullName,
-          initials: this.getInitials(fullName),
         };
 
         this.stats = [
@@ -457,14 +486,13 @@ export class Dashboard {
     if (this.showPoliticalParty) payload['political_party'] = raw.political_party;
     if (this.showPollingStation) payload['polling_station'] = raw.polling_station;
 
-    console.log('Onboarding payload:', payload);
-
+   
     this.onBoardingService.postOnBoarding(this.currentUserId, payload).subscribe({
       next: (res: any) => {
         this.showSuccess('Onboarding successful!');
+        this.dialog.closeAll();
       },
       error: (err) => {
-        console.error('Onboarding failed:', err);
         this.showError('Onboarding failed. Please try again.');
       }
     });
@@ -498,9 +526,8 @@ export class Dashboard {
   }
 
   candidate = {
-    name: 'James Kariuki',
-    initials: 'JK',
-    party: 'Jubilee Party',
+  
+  
     constituency: 'Westlands Constituency',
     county: 'Nairobi County',
     electionDate: '9 Aug 2027',
@@ -556,7 +583,6 @@ export class Dashboard {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
-        console.log('Onboarding dialog closed with:', result);
       }
     });
   }
