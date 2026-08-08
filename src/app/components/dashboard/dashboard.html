@@ -243,3 +243,89 @@
   </div>
 
 </div>
+
+
+
+<ng-template #locationPartyOnboarding>
+  <h2 mat-dialog-title>Complete Your Candidate Profile</h2>
+
+  <div mat-dialog-content class="onboarding-dialog-content">
+    <form [formGroup]="onboardingForm" class="onboarding-form">
+
+      <mat-form-field appearance="outline" class="form-field" *ngIf="showCounty">
+        <mat-label>County</mat-label>
+        <input
+          matInput
+          formControlName="countySearch"
+          [matAutocomplete]="countyAuto"
+          placeholder="Start typing a county..."
+        />
+        <mat-autocomplete #countyAuto="matAutocomplete" [displayWith]="displayCounty" (optionSelected)="onCountySelected($event)">
+          <mat-option *ngFor="let county of (filteredCounties$ | async)" [value]="county">
+            {{ county.name }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="onboardingForm.get('county')?.hasError('required')">County is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field" *ngIf="showConstituency">
+        <mat-label>Constituency</mat-label>
+        <mat-select
+          formControlName="constituency"
+          (selectionChange)="onConstituencyChange($event.value)"
+        >
+          <mat-option *ngFor="let c of constituencies" [value]="c.id">{{ c.name }}</mat-option>
+        </mat-select>
+        <mat-hint *ngIf="constituenciesLoading">Loading constituencies...</mat-hint>
+        <mat-error *ngIf="onboardingForm.get('constituency')?.hasError('required')">Constituency is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field" *ngIf="showWard">
+        <mat-label>Ward</mat-label>
+        <mat-select
+          formControlName="ward"
+          (selectionChange)="onWardChange($event.value)"
+        >
+          <mat-option *ngFor="let w of wards" [value]="w.id">{{ w.name }}</mat-option>
+        </mat-select>
+        <mat-hint *ngIf="wardsLoading">Loading wards...</mat-hint>
+        <mat-error *ngIf="onboardingForm.get('ward')?.hasError('required')">Ward is required</mat-error>
+      </mat-form-field>
+
+      <!-- Political party: shows "ODM - Orange Democratic Movement" -->
+      <mat-form-field appearance="outline" class="form-field" *ngIf="showPoliticalParty">
+        <mat-label>Political Party</mat-label>
+        <input
+          matInput
+          formControlName="politicalPartySearch"
+          [matAutocomplete]="partyAuto"
+          placeholder="Search by name or abbreviation..."
+        />
+        <mat-autocomplete #partyAuto="matAutocomplete" [displayWith]="displayParty" (optionSelected)="onPartySelected($event)">
+          <mat-option *ngFor="let party of (filteredParties$ | async)" [value]="party">
+            {{ formatParty(party) }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="onboardingForm.get('political_party')?.hasError('required')">Political party is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field" *ngIf="showPollingStation">
+        <mat-label>Polling Station</mat-label>
+        <input matInput formControlName="polling_station" placeholder="Enter polling station" />
+        <mat-error *ngIf="onboardingForm.get('polling_station')?.hasError('required')">Polling station is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Campaign Start Date</mat-label>
+        <input matInput type="date" formControlName="campaign_start_date" />
+        <mat-error *ngIf="onboardingForm.get('campaign_start_date')?.hasError('required')">Campaign start date is required</mat-error>
+      </mat-form-field>
+
+    </form>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-button matDialogClose="no">Cancel</button>
+    <button mat-flat-button color="primary" (click)="submitOnboarding()">Submit</button>
+  </div>
+</ng-template>

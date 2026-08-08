@@ -695,3 +695,32 @@ body { font-family: var(--font-body); background: var(--gray-bg); }
 @media (max-width: 420px) {
   .stats-row { grid-template-columns: 1fr; }
 }
+
+
+
+.onboarding-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.onboarding-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.onboarding-form .form-field {
+  width: 100%;
+}
+
+/* Fields that should span full width even on desktop */
+.onboarding-form .form-field:last-child {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 599px) {
+  .onboarding-form {
+    grid-template-columns: 1fr;
+  }
+}
