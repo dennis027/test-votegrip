@@ -78,7 +78,6 @@ export class Dashboard {
   constituenciesLoading = false;
   wardsLoading = false;
 
-
   currentUserId: any;
 
   private profileLoaded = false;
@@ -88,8 +87,6 @@ export class Dashboard {
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    
-    console.log('candidate details', this.candidate);
     this.buildOnboardingForm();
 
     this.getCounties();
@@ -103,45 +100,32 @@ export class Dashboard {
         const mobilizers = profile?.data?.profile?.mobilizers_count ?? 0;
         const elections = profile?.data?.profile?.elections ?? [];
 
-      this.profileDesiredPosition = profile?.data?.profile?.desired_position ?? null;
+        this.profileDesiredPosition = profile?.data?.profile?.desired_position ?? null;
 
-      console.log('Election Details:', profile?.data?.profile?.elections);
+        this.candidatePoliticalParty = profile?.data?.profile?.elections?.[0]?.political_party?.name ?? null;
 
-      this.candidatePoliticalParty =profile?.data?.profile?.elections?.[0]?.political_party.name ?? null;
+        const election = profile?.data?.profile?.elections?.[0] ?? null;
+        this.candidateLocation = election;
 
-     const election = profile?.data?.profile?.elections?.[0] ?? null;
+        if (this.candidateLocation) {
+          const { county, constituency, ward } = this.candidateLocation;
 
-    this.candidateLocation = election;
+          if (county && constituency && ward) {
+            this.candidateLocation = `${ward} Ward`;
+          } else if (county && constituency) {
+            this.candidateLocation = `${constituency} Constituency`;
+          } else if (county) {
+            this.candidateLocation = `${county} County`;
+          } else {
+            this.candidateLocation = 'Presidential';
+          }
+        }
 
-    if (this.candidateLocation) {
-      const { county, constituency, ward } = this.candidateLocation;
-
-      if (county && constituency && ward) {
-        // WANGU Ward
-        this.candidateLocation = `${ward} Ward`;
-      } else if (county && constituency) {
-        // KIHARU Constituency
-        this.candidateLocation = `${constituency} Constituency`;
-      } else if (county) {
-        // Murang'a County
-        this.candidateLocation = `${county} County`;
-      } else {
-        // No location => Presidential
-        this.candidateLocation = 'Presidential';
-      }
-    }  
-      console.log('Candidate Political Party:', this.candidatePoliticalParty);
-
-
-      this.currentUserId = profile.data?.id;
+        this.currentUserId = profile.data?.id;
 
         this.name = fullName;
         this.agentsNumber = agents;
         this.mobilizersNumber = mobilizers;
-
-        this.candidate = {
-          ...this.candidate,
-        };
 
         this.stats = [
           { label: 'Total Agents', value: agents, sub: '28 pending approval', icon: 'agents', color: 'blue', trend: '+14', trendUp: true },
@@ -172,10 +156,9 @@ export class Dashboard {
         this.cdr.markForCheck();
       }
     });
-
-  
   }
 
+  // ── Form setup ──────────────────────────────────────────────────────
   private buildOnboardingForm(): void {
     this.onboardingForm = this.fb.group({
       countySearch: [''],
@@ -183,9 +166,8 @@ export class Dashboard {
       constituency: [{ value: '', disabled: true }],
       ward: [{ value: '', disabled: true }],
       politicalPartySearch: [''],
-      political_party: [''],
+      political_party: ['', Validators.required], // always required now — see showPoliticalParty
       campaign_start_date: ['', Validators.required],
-      polling_station: [''],
     });
 
     this.filteredCounties$ = this.onboardingForm.get('countySearch')!.valueChanges.pipe(
@@ -199,12 +181,6 @@ export class Dashboard {
     );
   }
 
-  /**
-   * Filters a list by `name` (and optionally a second field, e.g. `abbreviation`).
-   * Guards against non-string values, since mat-autocomplete sets the control's
-   * value to the SELECTED OBJECT once an option is chosen — displayWith only
-   * controls what's rendered, not what valueChanges emits.
-   */
   private filterByName(list: any[], value: unknown, extraField?: string): any[] {
     if (value == null) return list;
     if (typeof value !== 'string') return list;
@@ -219,7 +195,6 @@ export class Dashboard {
     });
   }
 
-  /** "ODM - Orange Democratic Movement" style label for a political party. */
   formatParty(party: any): string {
     if (!party) return '';
     return party.abbreviation ? `${party.abbreviation} - ${party.name}` : party.name;
@@ -290,39 +265,35 @@ export class Dashboard {
     }
   }
 
+  /** Sets/clears required validators on form controls depending on geographyLevel.
+   *  political_party & campaign_start_date are ALWAYS required, regardless of level. */
   private applyGeographyValidators(): void {
     const county = this.onboardingForm.get('county')!;
     const constituency = this.onboardingForm.get('constituency')!;
     const ward = this.onboardingForm.get('ward')!;
-    const politicalParty = this.onboardingForm.get('political_party')!;
-    const pollingStation = this.onboardingForm.get('polling_station')!;
 
-    [county, constituency, ward, politicalParty, pollingStation].forEach(c => c.clearValidators());
+    [county, constituency, ward].forEach(c => c.clearValidators());
 
     switch (this.geographyLevel) {
-      case 'ward':
+      case 'ward': // MCA — county, constituency, ward
         county.setValidators([Validators.required]);
         constituency.setValidators([Validators.required]);
         ward.setValidators([Validators.required]);
-        politicalParty.setValidators([Validators.required]);
         break;
-      case 'constituency':
+      case 'constituency': // MP — county, constituency
         county.setValidators([Validators.required]);
         constituency.setValidators([Validators.required]);
-        politicalParty.setValidators([Validators.required]);
         break;
-      case 'county':
+      case 'county': // Governor, Senator, Woman Rep — county only
         county.setValidators([Validators.required]);
-        politicalParty.setValidators([Validators.required]);
         break;
-      case 'none':
-        pollingStation.setValidators([Validators.required]);
+      case 'none': // President — no location fields at all
         break;
       default:
         break;
     }
 
-    [county, constituency, ward, politicalParty, pollingStation].forEach(c => c.updateValueAndValidity());
+    [county, constituency, ward].forEach(c => c.updateValueAndValidity());
   }
 
   get showCounty(): boolean {
@@ -334,13 +305,12 @@ export class Dashboard {
   get showWard(): boolean {
     return this.geographyLevel === 'ward';
   }
-  get showPollingStation(): boolean {
-    return this.geographyLevel === 'none';
-  }
+  /** Political party is asked for EVERY candidate, including President ('none'). */
   get showPoliticalParty(): boolean {
-    return this.geographyLevel !== 'none' && this.geographyLevel !== null;
+    return true;
   }
 
+  // ── Geography lookups ───────────────────────────────────────────────
   getCounties(): void {
     this.geographicalService.getCounties().subscribe({
       next: (res: any) => {
@@ -468,6 +438,7 @@ export class Dashboard {
     });
   }
 
+  // ── Submit ──────────────────────────────────────────────────────────
   submitOnboarding(): void {
     if (this.onboardingForm.invalid) {
       this.onboardingForm.markAllAsTouched();
@@ -478,21 +449,19 @@ export class Dashboard {
     const raw = this.onboardingForm.getRawValue();
     const payload: Record<string, any> = {
       campaign_start_date: raw.campaign_start_date,
+      political_party: raw.political_party,
     };
 
     if (this.showCounty) payload['county'] = raw.county;
     if (this.showConstituency) payload['constituency'] = raw.constituency;
     if (this.showWard) payload['ward'] = raw.ward;
-    if (this.showPoliticalParty) payload['political_party'] = raw.political_party;
-    if (this.showPollingStation) payload['polling_station'] = raw.polling_station;
 
-   
     this.onBoardingService.postOnBoarding(this.currentUserId, payload).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.showSuccess('Onboarding successful!');
         this.dialog.closeAll();
       },
-      error: (err) => {
+      error: () => {
         this.showError('Onboarding failed. Please try again.');
       }
     });
@@ -526,8 +495,6 @@ export class Dashboard {
   }
 
   candidate = {
-  
-  
     constituency: 'Westlands Constituency',
     county: 'Nairobi County',
     electionDate: '9 Aug 2027',
@@ -576,14 +543,15 @@ export class Dashboard {
     { label: 'Missing',  value: 18,  pct: 6,  color: '#EF4444' },
   ];
 
+  /** Dialog cannot be dismissed via backdrop click or Escape — must be completed to close. */
   candidateOnBoarding() {
     const dialogRef = this.dialog.open(this.locationPartyOnboarding, {
       width: '520px',
       maxWidth: '95vw',
+      disableClose: true,
     });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== undefined) {
-      }
+    dialogRef.afterClosed().subscribe(() => {
+      // Intentionally left for future post-close hooks
     });
   }
 }

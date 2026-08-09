@@ -1,0 +1,48 @@
+<section class="polling-station-table mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource">
+
+    <ng-container matColumnDef="polling_station_code">
+      <th mat-header-cell *matHeaderCellDef> Code </th>
+      <td mat-cell *matCellDef="let element"> {{ element.polling_station_code }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="polling_station_name">
+      <th mat-header-cell *matHeaderCellDef> Station Name </th>
+      <td mat-cell *matCellDef="let element"> {{ element.polling_station_name }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="station_type">
+      <th mat-header-cell *matHeaderCellDef> Station Type </th>
+      <td mat-cell *matCellDef="let element"> {{ element.station_type_display || element.station_type }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="assigned_to">
+      <th mat-header-cell *matHeaderCellDef> Assigned To </th>
+      <td mat-cell *matCellDef="let element">
+        <span class="assigned-badge" *ngIf="element.assigned_to; else unassignedTpl">
+          {{ element.assigned_to }}
+        </span>
+        <ng-template #unassignedTpl>
+          <span class="unassigned-badge">Unassigned</span>
+        </ng-template>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-button color="primary" (click)="onAssign(element)" [disabled]="!!element.assigned_to">
+          {{ element.assigned_to ? 'Reassign' : 'Assign' }}
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                 showFirstLastButtons
+                 aria-label="Select page of polling stations">
+  </mat-paginator>
+</section>

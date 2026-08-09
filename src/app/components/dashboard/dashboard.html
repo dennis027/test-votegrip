@@ -292,7 +292,7 @@
         <mat-error *ngIf="onboardingForm.get('ward')?.hasError('required')">Ward is required</mat-error>
       </mat-form-field>
 
-      <!-- Political party: shows "ODM - Orange Democratic Movement" -->
+      <!-- Political party: shown for every candidate, including President -->
       <mat-form-field appearance="outline" class="form-field" *ngIf="showPoliticalParty">
         <mat-label>Political Party</mat-label>
         <input
@@ -309,12 +309,6 @@
         <mat-error *ngIf="onboardingForm.get('political_party')?.hasError('required')">Political party is required</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field" *ngIf="showPollingStation">
-        <mat-label>Polling Station</mat-label>
-        <input matInput formControlName="polling_station" placeholder="Enter polling station" />
-        <mat-error *ngIf="onboardingForm.get('polling_station')?.hasError('required')">Polling station is required</mat-error>
-      </mat-form-field>
-
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Campaign Start Date</mat-label>
         <input matInput type="date" formControlName="campaign_start_date" />
@@ -325,7 +319,13 @@
   </div>
 
   <div mat-dialog-actions align="end">
-    <button mat-button matDialogClose="no">Cancel</button>
-    <button mat-flat-button color="primary" (click)="submitOnboarding()">Submit</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="submitOnboarding()"
+      [disabled]="onboardingForm.invalid"
+    >
+      Submit
+    </button>
   </div>
 </ng-template>
