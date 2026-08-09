@@ -37,6 +37,7 @@ import { FieldIntelService, FieldIntelBody } from '../../../services/candidates/
 export class FieldIntel implements OnInit, AfterViewInit {
   userForm!: FormGroup;
   candidateId: any;
+  editingCandidateId: any = null;
   isEditing = false;
   currentIntelId: string | null = null;
 
@@ -126,7 +127,11 @@ export class FieldIntel implements OnInit, AfterViewInit {
   getProfile() {
     this.authService.getProfile().subscribe({
       next: (profile: any) => {
-        this.candidateId = profile?.data.id;
+        // Fallbacks check candidate-specific properties first before profile id
+        this.candidateId =
+          profile?.data?.candidate_id ||
+          profile?.data?.candidate?.id ||
+          profile?.data?.id;
         this.getFieldIntel();
       },
       error: () => {
@@ -151,7 +156,6 @@ export class FieldIntel implements OnInit, AfterViewInit {
       panelClass: 'custom-dialog-container',
     });
     dialogRef.afterClosed().subscribe(() => {
-      this.isEditing = false;
       this.resetFormState();
     });
   }
@@ -162,7 +166,10 @@ export class FieldIntel implements OnInit, AfterViewInit {
       return;
     }
 
-    const payload = { ...this.userForm.value, candidate: this.candidateId };
+    const payload = {
+      ...this.userForm.value,
+      candidate: this.isEditing ? this.editingCandidateId : this.candidateId,
+    };
 
     const handleResponse = {
       next: () => {
@@ -196,6 +203,9 @@ export class FieldIntel implements OnInit, AfterViewInit {
   onEdit(intel: FieldIntelBody) {
     this.isEditing = true;
     this.currentIntelId = intel.id || null;
+    // Preserves candidate ID attached to the existing intel record
+    this.editingCandidateId = intel.candidate || this.candidateId;
+
     this.userForm.patchValue({
       polling_station: intel.polling_station,
       classification: intel.classification,
@@ -224,6 +234,7 @@ export class FieldIntel implements OnInit, AfterViewInit {
   resetFormState() {
     this.isEditing = false;
     this.currentIntelId = null;
+    this.editingCandidateId = null;
     this.userForm.reset({ classification: 'stronghold', risk_level: 'low', is_active: true });
   }
 

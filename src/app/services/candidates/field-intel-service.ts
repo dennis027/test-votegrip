@@ -20,7 +20,7 @@ export interface FieldIntelBody {
 @Injectable({ providedIn: 'root' })
 export class FieldIntelService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/field-intel/`; // adjust to your actual endpoint
+  private base = `${environment.apiUrl}/${environment.apiVersion}/campaign/classifications/`; // adjust to your actual endpoint
 
   getFieldIntelList() {
     return this.http.get<any>(this.base);
