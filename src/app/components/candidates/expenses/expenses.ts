@@ -37,6 +37,7 @@ import { ExpensesService, ExpenseBody } from '../../../services/candidates/expen
 export class Expenses implements OnInit, AfterViewInit {
   userForm!: FormGroup;
   candidateId: any;
+  editingCandidateId: any = null;
   isEditing = false;
   currentExpenseId: string | null = null;
 
@@ -131,7 +132,10 @@ export class Expenses implements OnInit, AfterViewInit {
   getProfile() {
     this.authService.getProfile().subscribe({
       next: (profile: any) => {
-        this.candidateId = profile?.data.id;
+        this.candidateId =
+          profile?.data?.candidate_id ||
+          profile?.data?.candidate?.id ||
+          profile?.data?.id;
         this.getExpenses();
       },
       error: () => {
@@ -144,8 +148,9 @@ export class Expenses implements OnInit, AfterViewInit {
   getExpenses() {
     this.expensesService.getExpensesList().subscribe({
       next: (response: any) => {
-        this.dataSource.data = response.results || [];
-        this.computeTotals(response.results || []);
+        const results = response.results || [];
+        this.dataSource.data = results;
+        this.computeTotals(results);
       },
       error: () => this.showError('Failed to load expenses.'),
     });
@@ -167,7 +172,6 @@ export class Expenses implements OnInit, AfterViewInit {
       panelClass: 'custom-dialog-container',
     });
     dialogRef.afterClosed().subscribe(() => {
-      this.isEditing = false;
       this.resetFormState();
     });
   }
@@ -178,10 +182,11 @@ export class Expenses implements OnInit, AfterViewInit {
       return;
     }
 
+    const targetCandidateId = this.isEditing ? this.editingCandidateId : this.candidateId;
     const payload = {
       ...this.userForm.value,
-      candidate: this.candidateId,
-      incurred_by: this.candidateId,
+      candidate: targetCandidateId,
+      incurred_by: targetCandidateId,
     };
 
     const handleResponse = {
@@ -216,6 +221,7 @@ export class Expenses implements OnInit, AfterViewInit {
   onEdit(expense: ExpenseBody) {
     this.isEditing = true;
     this.currentExpenseId = expense.id || null;
+    this.editingCandidateId = expense.candidate || this.candidateId;
     this.userForm.patchValue({
       expense_category: expense.expense_category,
       description: expense.description,
@@ -245,6 +251,7 @@ export class Expenses implements OnInit, AfterViewInit {
   resetFormState() {
     this.isEditing = false;
     this.currentExpenseId = null;
+    this.editingCandidateId = null;
     this.userForm.reset({ expense_category: 'transport', status: 'pending', is_active: true });
   }
 

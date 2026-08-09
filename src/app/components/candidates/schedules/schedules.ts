@@ -41,6 +41,7 @@ interface CalendarDay {
 export class Schedules implements OnInit {
   userForm!: FormGroup;
   candidateId: any;
+  editingCandidateId: any = null;
   isEditing = false;
   currentScheduleId: string | null = null;
 
@@ -109,7 +110,10 @@ export class Schedules implements OnInit {
   getProfile() {
     this.authService.getProfile().subscribe({
       next: (profile: any) => {
-        this.candidateId = profile?.data.id;
+        this.candidateId =
+          profile?.data?.candidate_id ||
+          profile?.data?.candidate?.id ||
+          profile?.data?.id;
         this.getSchedules();
       },
       error: () => {
@@ -126,6 +130,7 @@ export class Schedules implements OnInit {
         this.indexActivities();
         this.buildCalendar();
         this.buildUpcomingList();
+        this.autoSelectInitialDay();
       },
       error: () => this.showError('Failed to load schedule.'),
     });
@@ -182,11 +187,33 @@ export class Schedules implements OnInit {
   }
 
   buildUpcomingList() {
-    const now = new Date();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
     this.upcomingActivities = this.allActivities
-      .filter((a) => a.start_time && new Date(a.start_time).getTime() >= now.getTime())
+      .filter((a) => a.start_time && new Date(a.start_time).getTime() >= todayStart.getTime())
       .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
       .slice(0, 15);
+  }
+
+  autoSelectInitialDay() {
+    const todayKey = this.dateKey(new Date());
+
+    // 1. If today has activities, select today
+    if (this.activitiesByDate.has(todayKey) && (this.activitiesByDate.get(todayKey)?.length || 0) > 0) {
+      this.selectDay(todayKey);
+      return;
+    }
+
+    // 2. Otherwise, select the date of the next upcoming activity (e.g., tomorrow)
+    if (this.upcomingActivities.length > 0 && this.upcomingActivities[0].start_time) {
+      const nextKey = this.dateKey(new Date(this.upcomingActivities[0].start_time));
+      this.selectDay(nextKey);
+      return;
+    }
+
+    // 3. Fall back to selecting today even if empty
+    this.selectDay(todayKey);
   }
 
   prevMonth() {
@@ -223,7 +250,6 @@ export class Schedules implements OnInit {
       panelClass: 'custom-dialog-container',
     });
     dialogRef.afterClosed().subscribe(() => {
-      this.isEditing = false;
       this.resetFormState();
     });
   }
@@ -242,7 +268,7 @@ export class Schedules implements OnInit {
     const raw = this.userForm.value;
     const payload: Partial<ScheduleBody> = {
       ...raw,
-      candidate: this.candidateId,
+      candidate: this.isEditing ? this.editingCandidateId : this.candidateId,
       start_time: new Date(raw.start_time).toISOString(),
       end_time: new Date(raw.end_time).toISOString(),
     };
@@ -279,6 +305,8 @@ export class Schedules implements OnInit {
   onEdit(activity: ScheduleBody) {
     this.isEditing = true;
     this.currentScheduleId = activity.id || null;
+    this.editingCandidateId = activity.candidate || this.candidateId;
+
     this.userForm.patchValue({
       activity_name: activity.activity_name,
       activity_type: activity.activity_type,
@@ -310,6 +338,7 @@ export class Schedules implements OnInit {
   resetFormState() {
     this.isEditing = false;
     this.currentScheduleId = null;
+    this.editingCandidateId = null;
     this.userForm.reset({ activity_type: 'meeting', status: 'scheduled', reminder_sent: false });
   }
 

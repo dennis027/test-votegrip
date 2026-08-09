@@ -22,7 +22,7 @@ export interface ExpenseBody {
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/expenses/`; // adjust to your actual endpoint
+  private base = `${environment.apiUrl}/${environment.apiVersion}/campaign/expenses/`; // adjust to your actual endpoint
 
   getExpensesList() {
     return this.http.get<any>(this.base);

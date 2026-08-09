@@ -24,7 +24,7 @@ export interface ScheduleBody {
 @Injectable({ providedIn: 'root' })
 export class SchedulesService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/schedules/`; // adjust to your actual endpoint
+  private base = `${environment.apiUrl}/${environment.apiVersion}/campaign/schedules/`; // adjust to your actual endpoint
 
   getSchedulesList() {
     return this.http.get<any>(this.base);
