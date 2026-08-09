@@ -34,6 +34,9 @@
         <button mat-button color="primary" (click)="onAssign(element)" [disabled]="!!element.assigned_to">
           {{ element.assigned_to ? 'Reassign' : 'Assign' }}
         </button>
+        <button mat-button color="warn" (click)="onUnassign(element)" [disabled]="!element.assigned_to">
+          Unassign
+        </button>
       </td>
     </ng-container>
 

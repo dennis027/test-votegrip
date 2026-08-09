@@ -192,7 +192,7 @@ addAgent() {
       next: () => {
         this.showSuccess('Agent added successfully.');
         this.closeDialog();
-        this.loadCandidates();
+        this.getUserAgents()
       },
       error: (err) => {
         const backendErrors = err?.error?.errors;

@@ -10,6 +10,8 @@ import { AuthService } from '../../../services/auth/auth';
 import { ElectionTypesService } from '../../../services/election-types-service';
 import { PolingStationService } from '../../../services/poling-station-service';
 import { PollingStationTable } from './polling-station-table/polling-station-table';
+import { AgentsService } from '../../../services/candidates/agents-service';
+import { UsersService } from '../../../services/users';
 
 export interface polingStationObj {
   id?: string;
@@ -62,6 +64,7 @@ export class AssignPollingStation {
   private router = inject(Router);
   private electionTypesService = inject(ElectionTypesService);
   private pollingStationService = inject(PolingStationService);
+  private userService = inject(UsersService);
   private platformId = inject(PLATFORM_ID);
 
   // ── Raw data ────────────────────────────────────────────────────────
@@ -91,6 +94,8 @@ export class AssignPollingStation {
 
   totalStations = 0;
   totalUnassigned = 0;
+  currentCandidateId: string | null = null;
+  candidatesAgents: any[] = [];
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -98,7 +103,10 @@ export class AssignPollingStation {
     this.fetchCandidatePollingStations();
     this.getLoggedInUser();
     this.getElectionTypes();
+
   }
+
+  
 
   // ── Data loading ────────────────────────────────────────────────────
   fetchCandidatePollingStations(): void {
@@ -129,6 +137,9 @@ export class AssignPollingStation {
     this.authService.getProfile().subscribe({
       next: (user: any) => {
         this.profileDesiredPosition = user?.data?.profile?.desired_position ?? null;
+        this.currentCandidateId = user?.data?.id ?? null;
+        console.log('Logged-in user profile fetched successfully:', this.currentCandidateId);
+        this.getUserAgents();
         this.profileLoaded = true;
         this.resolveGeographyScope();
         this.cdr.markForCheck();
@@ -299,4 +310,31 @@ export class AssignPollingStation {
       verticalPosition: 'top'
     });
   }
+
+
+getUserAgents(): void {
+  this.userService
+    .getUsersList('agent', this.currentCandidateId)
+    .subscribe({
+      next: (res: any) => {
+        console.log('User agents fetched successfully:', res);
+
+        this.candidatesAgents = res?.data ?? [];
+
+        console.log('Candidates Agents:', this.candidatesAgents);
+
+        // Tell Angular the input value has changed
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+        console.error('Error fetching user agents:', err);
+        this.showError(
+          'Failed to fetch user agents. Please try again later.'
+        );
+      }
+    });
+}
+
+
 }
