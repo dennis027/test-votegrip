@@ -58,15 +58,14 @@
   </div>
 
   <!-- Flat view (ward-scope candidates — already scoped to a single ward) -->
-<ng-container
-  *ngIf="!isLoading && flatStations.length > 0 && groupLevels.length === 0"
->
-  <app-polling-station-table
-    [stations]="flatStations"
-    [agents]="candidatesAgents"
-    (assign)="assignPollingStation($event)"
-  ></app-polling-station-table>
-</ng-container>
+  <ng-container *ngIf="!isLoading && flatStations.length > 0 && groupLevels.length === 0">
+    <app-polling-station-table
+      [stations]="flatStations"
+      [agents]="candidatesAgents"
+      [currentCandidateId]="currentCandidateId"
+      (stationUpdated)="onStationUpdated($event)"
+    ></app-polling-station-table>
+  </ng-container>
 
   <!-- Grouped tree view -->
   <ng-container *ngIf="!isLoading && flatStations.length > 0 && groupLevels.length > 0">
@@ -96,7 +95,9 @@
         <ng-container *ngIf="node.isLeaf">
           <app-polling-station-table
             [stations]="node.stations"
-            (assign)="assignPollingStation($event)"
+            [agents]="candidatesAgents"
+            [currentCandidateId]="currentCandidateId"
+            (stationUpdated)="onStationUpdated($event)"
           ></app-polling-station-table>
         </ng-container>
       </mat-expansion-panel>

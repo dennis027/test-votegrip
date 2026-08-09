@@ -287,12 +287,16 @@ export class AssignPollingStation {
   }
 
   // ── Actions ─────────────────────────────────────────────────────────
-  assignPollingStation(station: polingStationObj): void {
-    // TODO: replace with real assignment endpoint once confirmed
-    console.log('Assigning polling station:', station);
-    this.showSuccess(`Polling station ${station.polling_station_name} assigned successfully.`);
+onStationUpdated(updatedStation: polingStationObj): void {
+  const idx = this.candidatePolingStations.findIndex(s => s.id === updatedStation.id);
+  if (idx !== -1) {
+    this.candidatePolingStations[idx] = updatedStation;
   }
-
+  this.totalUnassigned = this.candidatePolingStations.filter(s => !s.assigned_to).length;
+  this.rebuildView();
+  this.showSuccess(`Polling station ${updatedStation.polling_station_name} updated.`);
+  this.cdr.markForCheck();
+}
   showSuccess(message: string) {
     this.snackBar.open(message, 'Close', {
       duration: 3000,

@@ -23,6 +23,45 @@ table {
   font-size: 0.8rem;
 }
 
+.status-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-reassigned {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-withdrawn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-none {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 640px) {
   .polling-station-table {
     overflow-x: auto;

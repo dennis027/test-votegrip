@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>
+  {{ isReassign ? 'Reassign' : 'Assign' }} — {{ data.station.polling_station_name }}
+</h2>
+
+<div mat-dialog-content class="agent-dialog-content">
+  <p class="context-line" *ngIf="isReassign && data.currentAgentLabel">
+    Currently assigned to: <strong>{{ data.currentAgentLabel }}</strong>
+  </p>
+
+  <p class="section-label">Select an agent</p>
+
+  <div class="agent-list" *ngIf="data.agents.length > 0; else noAgents">
+    <mat-radio-group [(ngModel)]="selectedAgentId" class="agent-radio-group">
+      <label class="agent-option" *ngFor="let agent of data.agents">
+        <mat-radio-button [value]="agent.id"></mat-radio-button>
+        <span class="agent-info">
+          <span class="agent-name">{{ agent.first_name }} {{ agent.last_name }}</span>
+          <span class="agent-contact" *ngIf="agent.phone || agent.email">
+            {{ agent.phone }}<span *ngIf="agent.phone && agent.email"> · </span>{{ agent.email }}
+          </span>
+        </span>
+      </label>
+    </mat-radio-group>
+  </div>
+
+  <ng-template #noAgents>
+    <p class="empty-agents">No agents available. Add agents before assigning a station.</p>
+  </ng-template>
+
+  <mat-form-field appearance="outline" class="reason-field" *ngIf="isReassign">
+    <mat-label>Reason for reassignment</mat-label>
+    <textarea matInput [(ngModel)]="reassignmentReason" rows="3" placeholder="Explain why this station is being reassigned..."></textarea>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" [disabled]="!canConfirm" (click)="confirm()">
+    {{ isReassign ? 'Reassign' : 'Assign' }}
+  </button>
+</div>

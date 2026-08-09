@@ -1,0 +1,75 @@
+.agent-dialog-content {
+  min-width: 320px;
+  max-width: 480px;
+}
+
+.context-line {
+  margin: 0 0 12px 0;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 8px 0;
+}
+
+.agent-list {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.agent-radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.agent-option:hover {
+  background: #f8fafc;
+}
+
+.agent-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 4px;
+}
+
+.agent-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.agent-contact {
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+.empty-agents {
+  color: #94a3b8;
+  font-style: italic;
+  padding: 16px 0;
+}
+
+.reason-field {
+  width: 100%;
+}
