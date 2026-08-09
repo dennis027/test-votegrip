@@ -37,6 +37,7 @@ import { DocumentsService, DocumentBody } from '../../../services/candidates/doc
 export class Documentations implements OnInit, AfterViewInit {
   userForm!: FormGroup;
   candidateId: any;
+  editingCandidateId: any = null;
   isEditing = false;
   currentDocId: string | null = null;
 
@@ -119,7 +120,11 @@ export class Documentations implements OnInit, AfterViewInit {
   getProfile() {
     this.authService.getProfile().subscribe({
       next: (profile: any) => {
-        this.candidateId = profile?.data.id;
+        // Checks candidate-specific properties first before falling back to profile id
+        this.candidateId =
+          profile?.data?.candidate_id ||
+          profile?.data?.candidate?.id ||
+          profile?.data?.id;
         this.getDocuments();
       },
       error: () => {
@@ -144,7 +149,6 @@ export class Documentations implements OnInit, AfterViewInit {
       panelClass: 'custom-dialog-container',
     });
     dialogRef.afterClosed().subscribe(() => {
-      this.isEditing = false;
       this.resetFormState();
     });
   }
@@ -158,7 +162,7 @@ export class Documentations implements OnInit, AfterViewInit {
     const raw = this.userForm.value;
     const payload: Partial<DocumentBody> = {
       ...raw,
-      candidate: this.candidateId,
+      candidate: this.isEditing ? this.editingCandidateId : this.candidateId,
       accessible_to: raw.accessible_to
         ? raw.accessible_to.split(',').map((s: string) => s.trim()).filter(Boolean)
         : [],
@@ -196,6 +200,9 @@ export class Documentations implements OnInit, AfterViewInit {
   onEdit(doc: DocumentBody) {
     this.isEditing = true;
     this.currentDocId = doc.id || null;
+    // Preserves candidate ID attached directly to the document object
+    this.editingCandidateId = doc.candidate || this.candidateId;
+
     this.userForm.patchValue({
       document_name: doc.document_name,
       document_type: doc.document_type,
@@ -205,7 +212,9 @@ export class Documentations implements OnInit, AfterViewInit {
       folder_path: doc.folder_path,
       version: doc.version,
       is_public: doc.is_public,
-      accessible_to: Array.isArray(doc.accessible_to) ? doc.accessible_to.join(', ') : doc.accessible_to,
+      accessible_to: Array.isArray(doc.accessible_to)
+        ? doc.accessible_to.join(', ')
+        : doc.accessible_to,
       is_active: doc.is_active,
     });
     this.addUpdateDialC();
@@ -229,6 +238,7 @@ export class Documentations implements OnInit, AfterViewInit {
   resetFormState() {
     this.isEditing = false;
     this.currentDocId = null;
+    this.editingCandidateId = null;
     this.userForm.reset({ document_type: 'guideline', version: 1, is_public: true, is_active: true });
   }
 

@@ -25,7 +25,7 @@ export interface DocumentBody {
 @Injectable({ providedIn: 'root' })
 export class DocumentsService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/documents/`; // adjust to your actual endpoint
+  private base = `${environment.apiUrl}/${environment.apiVersion}/campaign/documents/`; 
 
   getDocumentsList() {
     return this.http.get<any>(this.base);
