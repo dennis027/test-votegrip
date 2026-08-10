@@ -9,7 +9,7 @@
     <div class="header-controls">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search</mat-label>
-        <input matInput placeholder="Name or type" (input)="applyFilter($any($event.target).value)" />
+        <input matInput placeholder="Name, type, or supplier..." (input)="applyFilter($any($event.target).value)" />
       </mat-form-field>
       <button mat-flat-button color="primary" (click)="addUpdateDialC()">
         + Add Item
@@ -31,6 +31,13 @@
           <span class="type-chip">{{ element.item_type_display || element.item_type }}</span>
         </td>
       </ng-container>
+
+    <ng-container matColumnDef="supplier">
+      <th mat-header-cell *matHeaderCellDef> Supplier </th>
+      <td mat-cell *matCellDef="let element">
+        <span class="supplier-tag">{{ getSupplierName(element.supplier) }}</span>
+      </td>
+    </ng-container>
 
       <ng-container matColumnDef="quantity_total">
         <th mat-header-cell *matHeaderCellDef> Total </th>
@@ -91,6 +98,7 @@
   </section>
 </div>
 
+<!-- ADD/UPDATE ITEM DIALOG -->
 <ng-template #addUpdateItemDialog>
   <div class="dialog-container">
     <div class="dialog-header-row">
@@ -103,7 +111,7 @@
       <div class="grid-two">
         <mat-form-field appearance="outline" class="full-width span-two">
           <mat-label>Item Name</mat-label>
-          <input matInput formControlName="item_name" placeholder="e.g. Ballot Boxes" />
+          <input matInput formControlName="item_name" placeholder="e.g. T-Shirts, Posters" />
           <mat-error *ngIf="userForm.get('item_name')?.touched && userForm.get('item_name')?.invalid">
             Valid item name required.
           </mat-error>
@@ -115,6 +123,23 @@
             <mat-option *ngFor="let t of itemTypes" [value]="t.value">{{ t.label }}</mat-option>
           </mat-select>
         </mat-form-field>
+
+        <div class="supplier-select-group full-width">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Supplier</mat-label>
+            <mat-select formControlName="supplier">
+              <mat-option *ngFor="let s of suppliersList" [value]="s.id">
+                {{ s.name }} ({{ s.category_display || s.category }})
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="userForm.get('supplier')?.touched && userForm.get('supplier')?.invalid">
+              Please select a supplier.
+            </mat-error>
+          </mat-form-field>
+          <button type="button" mat-stroked-button color="primary" class="btn-add-supplier-inline" (click)="openQuickAddSupplier()">
+            + Add New
+          </button>
+        </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Total Quantity</mat-label>
@@ -145,6 +170,75 @@
   </div>
 </ng-template>
 
+<!-- INLINE QUICK ADD SUPPLIER DIALOG -->
+<ng-template #quickAddSupplierDialog>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>Add New Supplier</h2>
+      <button type="button" mat-icon-button (click)="closeQuickAddSupplier()" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="supplierForm" (ngSubmit)="onQuickAddSupplierSubmit()">
+      <div class="grid-two">
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Supplier Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Premier Printing Services" />
+          <mat-error *ngIf="supplierForm.get('name')?.touched && supplierForm.get('name')?.invalid">
+            Supplier name is required.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category">
+            <mat-option *ngFor="let c of supplierCategories" [value]="c.value">{{ c.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contact Person</mat-label>
+          <input matInput formControlName="contact_person" placeholder="e.g. Jane Doe" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" placeholder="+254 700 000000" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="vendor@example.com" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Address</mat-label>
+          <input matInput formControlName="address" placeholder="Physical location" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let s of supplierStatuses" [value]="s.value">{{ s.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="is_active">Active</mat-slide-toggle>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" mat-button (click)="closeQuickAddSupplier()">Cancel</button>
+        <button type="submit" mat-flat-button color="primary" [disabled]="supplierForm.invalid">
+          Save Supplier
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- DELETE CONFIRMATION DIALOG -->
 <ng-template #deleteItemDialog>
   <div class="dialog-container">
     <div class="dialog-header-row">

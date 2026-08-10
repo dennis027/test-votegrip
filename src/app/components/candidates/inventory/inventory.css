@@ -103,6 +103,11 @@
   text-transform: capitalize;
 }
 
+.supplier-tag {
+  font-weight: 600;
+  color: var(--blue-mid);
+}
+
 .stock-cell {
   display: flex;
   flex-direction: column;
@@ -189,7 +194,7 @@
 
 .dialog-container {
   padding: 1.8rem;
-  max-width: 560px;
+  max-width: 580px;
   background: #fff;
   border-radius: 24px;
   box-shadow: 0 24px 70px rgba(15, 45, 90, 0.12);
@@ -221,6 +226,20 @@
 
 .full-width {
   width: 100%;
+}
+
+.supplier-select-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.btn-add-supplier-inline {
+  height: 54px;
+  margin-top: 2px;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-weight: 600;
 }
 
 .dialog-container mat-form-field {
@@ -262,33 +281,6 @@ button[mat-flat-button] {
   color: #fff;
 }
 
-@media (max-width: 720px) {
-  .manage-inventory-page {
-    padding: 16px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .grid-two {
-    grid-template-columns: 1fr;
-  }
-
-  .span-two {
-    grid-column: span 1;
-  }
-
-  .action-buttons {
-    width: 100%;
-  }
-
-  .action-buttons button {
-    width: 100%;
-  }
-}
-
 .btn-edit {
   background: linear-gradient(135deg, #1976d2, #1259a3);
   color: white !important;
@@ -313,4 +305,41 @@ button[mat-flat-button] {
 
 .btn-delete:hover {
   background: var(--red-bg);
+}
+
+@media (max-width: 720px) {
+  .manage-inventory-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .span-two {
+    grid-column: span 1;
+  }
+
+  .supplier-select-group {
+    flex-direction: column;
+  }
+
+  .btn-add-supplier-inline {
+    width: 100%;
+    height: 42px;
+    margin-top: -8px;
+  }
+
+  .action-buttons {
+    width: 100%;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
 }
