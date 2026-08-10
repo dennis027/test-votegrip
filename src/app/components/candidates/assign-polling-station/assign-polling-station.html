@@ -1,106 +1,267 @@
-<br>
-
 <div class="assign-polling-station-page">
   <header class="page-header">
     <div>
       <h2>Assign Polling Stations</h2>
-      <p class="page-copy">
-        Polling stations grouped by geographic area for your candidacy.
-        <span *ngIf="matchedPositionType"> Contesting: <strong>{{ matchedPositionType.name }}</strong></span>
+      <p class="page-copy" *ngIf="matchedPositionType">
+        Contesting: <strong>{{ matchedPositionType.name }}</strong>
       </p>
     </div>
   </header>
 
-  <!-- Summary bar -->
-  <div class="summary-bar" *ngIf="!isLoading">
+  <!-- Headline stat -->
+  <div class="summary-bar" *ngIf="!isInitializing">
     <div class="summary-pill">
-      <span class="summary-value">{{ totalStations }}</span>
+      <span class="summary-value">{{ totalStationsOverall !== null ? (totalStationsOverall | number) : '—' }}</span>
       <span class="summary-label">Total Stations</span>
     </div>
-    <div class="summary-pill unassigned">
-      <span class="summary-value">{{ totalUnassigned }}</span>
-      <span class="summary-label">Unassigned</span>
-    </div>
-    <div class="summary-pill assigned">
-      <span class="summary-value">{{ totalStations - totalUnassigned }}</span>
-      <span class="summary-label">Assigned</span>
-    </div>
   </div>
 
-  <!-- Controls -->
-  <div class="controls" *ngIf="!isLoading">
+  <!-- Initializing -->
+  <div *ngIf="isInitializing" class="loading-state">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Loading your candidate profile...</p>
+  </div>
+
+  <!-- Root loading -->
+  <div *ngIf="!isInitializing && rootLoading" class="loading-state">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Loading locations...</p>
+  </div>
+
+  <!-- No scope resolvable -->
+  <div *ngIf="!isInitializing && !rootLoading && rootNodes.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">location_off</mat-icon>
+    <h3>No locations available</h3>
+    <p>We couldn't determine which area to show. Please contact support.</p>
+  </div>
+
+  <!-- Root search — filters counties (national scope) or the top-level list -->
+  <div class="root-search" *ngIf="!isInitializing && !rootLoading && rootNodes.length > 1">
     <input
-      placeholder="Search by station, code, ward, constituency or county"
-      (input)="onSearchChange($any($event.target).value)"
-      class="search-input"
+      placeholder="Search {{ rootNodes[0]?.level === 'county' ? 'counties' : rootNodes[0]?.level === 'constituency' ? 'constituencies' : 'wards' }}..."
+      [ngModel]="rootSearchTerm"
+      (ngModelChange)="onRootSearchChange($event)"
+      class="root-search-input"
     />
-
-    <mat-button-toggle-group
-      [value]="assignedFilter"
-      (change)="onAssignedFilterChange($event.value)"
-      class="assigned-filter-group"
-    >
-      <mat-button-toggle value="all">All</mat-button-toggle>
-      <mat-button-toggle value="unassigned">Unassigned</mat-button-toggle>
-      <mat-button-toggle value="assigned">Assigned</mat-button-toggle>
-    </mat-button-toggle-group>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="isLoading" class="loading-state">
-    <p>Loading polling stations...</p>
+  <!-- Page size selector — national scope only -->
+  <div class="page-size-row" *ngIf="!isInitializing && !rootLoading && isNationalRoot && rootFilteredNodes.length > 0">
+    <span class="page-size-label">Show</span>
+    <select class="page-size-select" [ngModel]="rootPageSize" (ngModelChange)="onRootPageSizeChange($event)">
+      <option *ngFor="let size of rootPageSizeOptions" [value]="size">{{ size }}</option>
+    </select>
+    <span class="page-size-label">per page</span>
+
+    <span class="page-range">
+      Showing {{ rootRangeStart }}–{{ rootRangeEnd }} of {{ rootFilteredNodes.length }}
+    </span>
   </div>
 
-  <!-- Empty -->
-  <div *ngIf="!isLoading && flatStations.length === 0" class="empty-state">
-    <h3>No polling stations found</h3>
-    <p>Try adjusting your search or filter.</p>
-  </div>
+  <!-- Tree -->
+  <ng-container *ngIf="!isInitializing && !rootLoading && rootNodes.length > 0">
+    <ng-container *ngTemplateOutlet="treeTpl; context: { nodes: rootPagedNodes, depth: 0 }"></ng-container>
 
-  <!-- Flat view (ward-scope candidates — already scoped to a single ward) -->
-  <ng-container *ngIf="!isLoading && flatStations.length > 0 && groupLevels.length === 0">
-    <app-polling-station-table
-      [stations]="flatStations"
-      [agents]="candidatesAgents"
-      [currentCandidateId]="currentCandidateId"
-      (stationUpdated)="onStationUpdated($event)"
-    ></app-polling-station-table>
+    <p class="node-empty" *ngIf="rootSearchTerm && rootFilteredNodes.length === 0">
+      No matches for "{{ rootSearchTerm }}".
+    </p>
+
+    <!-- Pagination controls — national scope only -->
+    <div class="pagination-controls" *ngIf="isNationalRoot && rootTotalPages > 1">
+      <button mat-button (click)="prevRootPage()" [disabled]="rootPageIndex === 0">
+        <mat-icon>chevron_left</mat-icon> Prev
+      </button>
+
+      <span class="page-indicator">
+        Page {{ rootPageIndex + 1 }} of {{ rootTotalPages }}
+      </span>
+
+      <button mat-button (click)="nextRootPage()" [disabled]="rootPageIndex >= rootTotalPages - 1">
+        Next <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
   </ng-container>
 
-  <!-- Grouped tree view -->
-  <ng-container *ngIf="!isLoading && flatStations.length > 0 && groupLevels.length > 0">
-    <ng-container *ngTemplateOutlet="groupTpl; context: { nodes: groupTree, depth: 0 }"></ng-container>
-  </ng-container>
-
-  <ng-template #groupTpl let-nodes="nodes" let-depth="depth">
+  <ng-template #treeTpl let-nodes="nodes" let-depth="depth">
     <mat-accordion multi="true" [class.nested-accordion]="depth > 0">
-      <mat-expansion-panel *ngFor="let node of nodes" class="group-panel" [class]="'level-' + node.levelKey">
-        <mat-expansion-panel-header>
+      <mat-expansion-panel
+        *ngFor="let node of nodes"
+        class="tree-panel"
+        [class]="'level-' + node.level"
+        [expanded]="node.expanded"
+        (opened)="node.expanded || toggleNode(node)"
+        (afterExpand)="node.expanded = true"
+      >
+        <mat-expansion-panel-header (click)="toggleNode(node)">
           <mat-panel-title>
-            <mat-icon class="level-icon">{{ node.isLeaf ? 'location_on' : 'folder' }}</mat-icon>
-            {{ node.label }}
+            <mat-icon class="level-icon">
+              {{ node.level === 'county' ? 'public' : node.level === 'constituency' ? 'location_city' : 'place' }}
+            </mat-icon>
+            {{ node.name }}
           </mat-panel-title>
           <mat-panel-description>
-            <span class="count-chip">{{ node.totalCount }} station{{ node.totalCount === 1 ? '' : 's' }}</span>
-            <span class="count-chip unassigned-chip" *ngIf="node.unassignedCount > 0">
+            <span class="count-chip" *ngIf="node.isLeaf && node.stationsLoaded">
+              {{ node.totalCount }} station{{ node.totalCount === 1 ? '' : 's' }}
+            </span>
+            <span class="count-chip unassigned-chip" *ngIf="node.isLeaf && node.stationsLoaded && node.unassignedCount > 0">
               {{ node.unassignedCount }} unassigned
             </span>
           </mat-panel-description>
         </mat-expansion-panel-header>
 
+        <!-- Non-leaf: children loading / search / list -->
         <ng-container *ngIf="!node.isLeaf">
-          <ng-container *ngTemplateOutlet="groupTpl; context: { nodes: node.children, depth: depth + 1 }"></ng-container>
+          <div class="node-loading" *ngIf="node.loadingChildren">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          </div>
+
+          <ng-container *ngIf="node.childrenLoaded && node.children.length > 0">
+            <!-- Child search — filters constituencies within a county, or wards within a constituency -->
+            <div class="child-search" *ngIf="node.children.length > 1">
+              <input
+                placeholder="Search {{ node.level === 'county' ? 'constituencies' : 'wards' }} in {{ node.name }}..."
+                [ngModel]="node.childSearchTerm"
+                (ngModelChange)="onChildSearchChange(node, $event)"
+                class="child-search-input"
+              />
+            </div>
+
+            <ng-container *ngTemplateOutlet="treeTpl; context: { nodes: getVisibleChildren(node), depth: depth + 1 }"></ng-container>
+
+            <p class="node-empty" *ngIf="node.childSearchTerm && getVisibleChildren(node).length === 0">
+              No matches for "{{ node.childSearchTerm }}".
+            </p>
+          </ng-container>
+
+          <p class="node-empty" *ngIf="node.childrenLoaded && node.children.length === 0">
+            No sub-areas found.
+          </p>
         </ng-container>
 
+        <!-- Leaf (ward): stations table, loaded on expand -->
         <ng-container *ngIf="node.isLeaf">
-          <app-polling-station-table
-            [stations]="node.stations"
-            [agents]="candidatesAgents"
-            [currentCandidateId]="currentCandidateId"
-            (stationUpdated)="onStationUpdated($event)"
-          ></app-polling-station-table>
+          <div class="node-loading" *ngIf="node.stationsLoading">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <p>Loading polling stations...</p>
+          </div>
+
+          <ng-container *ngIf="node.stationsLoaded">
+            <div class="ward-controls" *ngIf="node.stations.length > 0">
+              <input
+                placeholder="Search station name or code..."
+                [ngModel]="node.searchTerm"
+                (ngModelChange)="onNodeSearchChange(node, $event)"
+                class="ward-search-input"
+              />
+              <mat-button-toggle-group
+                [value]="node.assignedFilter"
+                (change)="onNodeAssignedFilterChange(node, $event.value)"
+              >
+                <mat-button-toggle value="all">All</mat-button-toggle>
+                <mat-button-toggle value="unassigned">Unassigned</mat-button-toggle>
+                <mat-button-toggle value="assigned">Assigned</mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+
+            <p class="node-empty" *ngIf="node.stations.length === 0">
+              No polling stations found for this ward.
+            </p>
+
+            <div class="ward-table-wrapper" *ngIf="node.stations.length > 0">
+              <table class="ward-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Station Name</th>
+                    <th>Type</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let station of getVisibleStations(node)">
+                    <td>{{ station.polling_station_code }}</td>
+                    <td>{{ station.polling_station_name }}</td>
+                    <td>{{ station.station_type_display || station.station_type }}</td>
+                    <td>
+                      <span class="assigned-badge" *ngIf="station.assigned_to; else unassignedTpl">
+                        {{ station.assigned_to }}
+                      </span>
+                      <ng-template #unassignedTpl>
+                        <span class="unassigned-badge">Unassigned</span>
+                      </ng-template>
+                    </td>
+                    <td>
+                      <span class="status-chip" [ngClass]="statusClass(getStatus(station))">
+                        {{ statusLabel(getStatus(station)) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button mat-button color="primary" (click)="openAssignDialog(station, node, 'assign')" *ngIf="!station.assigned_to">
+                          Assign
+                        </button>
+                        <button mat-button color="accent" (click)="openAssignDialog(station, node, 'reassign')" *ngIf="station.assigned_to">
+                          Reassign
+                        </button>
+                        <button mat-button color="warn" (click)="withdrawStation(station, node)" *ngIf="station.assigned_to">
+                          Withdraw
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
         </ng-container>
       </mat-expansion-panel>
     </mat-accordion>
   </ng-template>
 </div>
+
+<!-- Assign / Reassign dialog -->
+<ng-template #agentAssignDialog>
+  <h2 mat-dialog-title>
+    {{ dialogMode === 'reassign' ? 'Reassign' : 'Assign' }} — {{ dialogStation?.polling_station_name }}
+  </h2>
+
+  <div mat-dialog-content class="agent-dialog-content">
+    <p class="context-line" *ngIf="dialogMode === 'reassign' && dialogStation?.assigned_to">
+      Currently assigned to: <strong>{{ dialogStation?.assigned_to }}</strong>
+    </p>
+
+    <p class="section-label">Select an agent</p>
+
+    <div class="agent-list" *ngIf="candidatesAgents.length > 0; else noAgents">
+      <mat-radio-group [(ngModel)]="dialogSelectedAgentId" class="agent-radio-group">
+        <label class="agent-option" *ngFor="let agent of candidatesAgents">
+          <mat-radio-button [value]="agent.id"></mat-radio-button>
+          <span class="agent-info">
+            <span class="agent-name">{{ agent.first_name }} {{ agent.last_name }}</span>
+            <span class="agent-contact" *ngIf="agent.phone || agent.email">
+              {{ agent.phone }}<span *ngIf="agent.phone && agent.email"> · </span>{{ agent.email }}
+            </span>
+          </span>
+        </label>
+      </mat-radio-group>
+    </div>
+
+    <ng-template #noAgents>
+      <p class="empty-agents">No agents available. Add agents before assigning a station.</p>
+    </ng-template>
+
+    <mat-form-field appearance="outline" class="reason-field" *ngIf="dialogMode === 'reassign'">
+      <mat-label>Reason for reassignment</mat-label>
+      <textarea matInput [(ngModel)]="dialogReassignReason" rows="3" placeholder="Explain why this station is being reassigned..."></textarea>
+    </mat-form-field>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-button matDialogClose>Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="!dialogCanConfirm" (click)="confirmAssignDialog()">
+      {{ dialogMode === 'reassign' ? 'Reassign' : 'Assign' }}
+    </button>
+  </div>
+</ng-template>

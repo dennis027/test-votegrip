@@ -26,7 +26,7 @@ export class PolingStationService {
 
   /** Get polling stations for a candidate */
   getCandidatePollingStations(county: string, constituency: string, ward: string): Observable<any> {
-    return this.http.get<any>(`${this.candidatePollingStations}?county_name=${county}&constituency_name=${constituency}&ward_name=${ward}`, { headers: this.headers });
+    return this.http.get<any>(`${this.candidatePollingStations}?county=${county}&constituency=${constituency}&ward=${ward}`, { headers: this.headers });
   }
 
 }
