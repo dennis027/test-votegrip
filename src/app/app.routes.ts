@@ -23,6 +23,7 @@ import { Inventory } from './components/candidates/inventory/inventory';
 import { Schedules } from './components/candidates/schedules/schedules';
 import { Structure } from './components/candidates/structure/structure';
 import { Expenses } from './components/candidates/expenses/expenses';
+import { Suppliers } from './components/candidates/suppliers/suppliers';
 
 
 export const routes: Routes = [
@@ -44,7 +45,8 @@ export const routes: Routes = [
       {path:'inventory', component:Inventory},
       {path:'schedules', component:Schedules },
       {path:'structure',component:Structure },
-      {path:'expenses', component:Expenses}
+      {path:'expenses', component:Expenses},
+      {path:'suppliers', component:Suppliers}
 
   ]},
 

@@ -1,0 +1,182 @@
+<div class="container-fluid">
+
+<div class="manage-suppliers-page">
+  <header class="page-header">
+    <div>
+      <h2>Suppliers</h2>
+      <p class="page-copy">Manage external vendors, procurement contacts, and campaign service providers.</p>
+    </div>
+    <div class="header-controls">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput placeholder="Name, category, contact..." (input)="applyFilter($any($event.target).value)" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="addUpdateDialC()">
+        + Add Supplier
+      </button>
+    </div>
+  </header>
+
+  <section class="table-panel mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="supplier-table">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="supplier-name">{{ element.name }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="category_display">
+        <th mat-header-cell *matHeaderCellDef> Category </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="type-chip">{{ element.category_display || element.category }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="contact_person">
+        <th mat-header-cell *matHeaderCellDef> Contact Person </th>
+        <td mat-cell *matCellDef="let element"> {{ element.contact_person || '-' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="phone">
+        <th mat-header-cell *matHeaderCellDef> Phone </th>
+        <td mat-cell *matCellDef="let element"> {{ element.phone || '-' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let element"> {{ element.email || '-' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="status-pill" [class.active]="element.status === 'active'" [class.inactive]="element.status !== 'active'">
+            {{ element.status_display || element.status }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="created_at">
+        <th mat-header-cell *matHeaderCellDef> Created </th>
+        <td mat-cell *matCellDef="let element"> {{ element.created_at | date:'mediumDate' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let element">
+          <div class="action-buttons">
+            <button mat-button class="btn-edit" (click)="onEdit(element)">Edit</button>
+            <button mat-button class="btn-delete" (click)="onDelete(element.id)">Delete</button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <div class="empty-state">No suppliers available yet.</div>
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  </section>
+</div>
+
+<ng-template #addUpdateSupplierDialog>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>{{ isEditing ? 'Update Supplier' : 'Add New Supplier' }}</h2>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="grid-two">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Supplier Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Apex Printers Ltd" />
+          <mat-error *ngIf="userForm.get('name')?.touched && userForm.get('name')?.invalid">
+            Valid supplier name required.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category">
+            <mat-option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contact Person</mat-label>
+          <input matInput formControlName="contact_person" placeholder="e.g. John Doe" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" placeholder="+254 700 000000" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="vendor@example.com" />
+          <mat-error *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid">
+            Please enter a valid email address.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Address</mat-label>
+          <input matInput formControlName="address" placeholder="Physical or office address" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-two">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="3" placeholder="Additional details, pricing terms..."></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="is_active">Active</mat-slide-toggle>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" mat-button matDialogClose>Cancel</button>
+        <button type="submit" mat-flat-button color="primary" [disabled]="userForm.invalid">
+          {{ isEditing ? 'Save Changes' : 'Add Supplier' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #deleteSupplierDialog>
+  <div class="dialog-container">
+    <div class="dialog-header-row">
+      <h2 mat-dialog-title>Delete Supplier</h2>
+      <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <h2 matDialogTitle>Are you sure you want to delete this supplier?</h2>
+
+    <mat-dialog-actions align="end">
+      <button mat-button matDialogClose="no">No</button>
+      <button mat-button matDialogClose="yes" class="danger-btn">Yes</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template>
+
+</div>

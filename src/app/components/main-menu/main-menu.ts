@@ -73,6 +73,11 @@ export class MainMenu implements OnInit {
                   icon: 'location'
                 },
                 {
+                  name: 'Suppliers',
+                  route: '/main-menu/suppliers',
+                  icon: 'git-network'
+                },
+                {
                   name: 'Documentation',
                   route: '/main-menu/documentation',
                   icon: 'document-text'
@@ -91,11 +96,6 @@ export class MainMenu implements OnInit {
                   name: 'Schedules',
                   route: '/main-menu/schedules',
                   icon: 'calendar'
-                },
-                {
-                  name: 'Structure',
-                  route: '/main-menu/structure',
-                  icon: 'git-network'
                 }
             ]
     },
