@@ -13,12 +13,13 @@ export interface InventoryBody {
   quantity_remaining?: number;
   is_active: boolean;
   created_at?: string;
+  supplier:string
 }
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/inventory/`; // adjust to your actual endpoint
+  private base = `${environment.apiUrl}/${environment.apiVersion}/campaign/inventory/`; // adjust to your actual endpoint
 
   getInventoryList() {
     return this.http.get<any>(this.base);
