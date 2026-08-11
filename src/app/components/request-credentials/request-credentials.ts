@@ -2,7 +2,12 @@ import { Component, OnInit, inject, ChangeDetectorRef, DestroyRef } from '@angul
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // The new optimized dep
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 import { UsersService } from '../../services/users';
 import { ElectionTypesService } from '../../services/election-types-service';
@@ -10,7 +15,15 @@ import { ElectionTypesService } from '../../services/election-types-service';
 @Component({
   selector: 'app-request-credentials',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
   templateUrl: './request-credentials.html',
   styleUrl: './request-credentials.css',
 })
@@ -22,13 +35,7 @@ export class RequestCredentials implements OnInit {
   done = false;
   submittedEmail: string | null = null;
 
-  electionTypes: any[] = []; // Store fetched election types
-
-  // UI Focus tracking
-  firstFoc = false;
-  lastFoc = false;
-  emailFoc = false;
-  phoneFoc = false;
+  electionTypes: any[] = [];
 
   // Services
   private fb = inject(FormBuilder);
@@ -36,16 +43,15 @@ export class RequestCredentials implements OnInit {
   private snackBar = inject(MatSnackBar);
   private electionTypesService = inject(ElectionTypesService);
   private cdr = inject(ChangeDetectorRef);
-  private destroyRef = inject(DestroyRef); // Required for clean cleanup
+  private destroyRef = inject(DestroyRef);
 
-  // Desired positions for the dropdown
   desiredPositions = [
     { label: 'President', value: 'president' },
     { label: 'Governor', value: 'governor' },
     { label: 'Senator', value: 'senator' },
     { label: 'Women Representative', value: 'womenrep' },
     { label: 'Member of Parliament', value: 'mp' },
-    { label: 'Member of County Asembly', value: 'mca' }
+    { label: 'Member of County Assembly', value: 'mca' }
   ];
 
   ngOnInit(): void {
@@ -57,12 +63,9 @@ export class RequestCredentials implements OnInit {
       desired_position: ['', [Validators.required]]
     });
 
-    this.getElectionTypes(); // Fetch election types on init
+    this.getElectionTypes();
   }
 
-  
-
-  // ── UI Helpers ──────────────────────────────────────────────────────────
   showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
       duration: 3000,
@@ -81,77 +84,70 @@ export class RequestCredentials implements OnInit {
     });
   }
 
-  // ── Logic ────────────────────────────────────────────────────────────────
-
   getElectionTypes(): void {
     this.electionTypesService.getElectionTypes().subscribe({
-          next: (res: any) => {
-            this.electionTypes = res || [];
-          },
-          error: (err) => {
-            this.showError('Failed to fetch election types. Please try again later.');
-          }
-        });
+      next: (res: any) => {
+        this.electionTypes = res || [];
+      },
+      error: () => {
+        this.showError('Failed to fetch election types. Please try again later.');
+      }
+    });
   }
-
 
   requestCredentials(): void {
-  this.submitted = true;
+    this.submitted = true;
 
-  if (this.form.invalid) {
-    this.showError('Please fill in all fields correctly.');
-    return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.showError('Please fill in all fields correctly.');
+      return;
+    }
+
+    this.loading = true;
+
+    this.usersService
+      .requestLoginCred(this.form.value)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (res?.success === false) {
+            const msg = this.extractFirstErrorMessage(res) || res?.message || 'Request failed.';
+            this.showError(msg);
+            return;
+          }
+
+          this.submittedEmail = this.form.value?.email ?? null;
+          this.form.reset();
+          this.submitted = false;
+          this.done = true;
+          this.showSuccess('Credentials request submitted! Check your email after some time.');
+        },
+        error: (err) => {
+          this.submitted = false;
+          const msg = this.extractFirstErrorMessage(err) || 'Request failed. Please try again.';
+          this.showError(msg);
+        },
+      });
   }
 
-  this.loading = true;
-
-  this.usersService
-    .requestLoginCred(this.form.value)
-    .pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      })
-    )
-    .subscribe({
-      next: (res: any) => {
-
-        if (res?.success === false) {
-          const msg = this.extractFirstErrorMessage(res) || res?.message || 'Request failed.';
-          this.showError(msg);
-          return; // loading=false + detectChanges handled by finalize
-        }
-
-        this.submittedEmail = this.form.value?.email ?? null;
-        this.form.reset();
-        this.submitted = false;
-        this.done = true;
-        this.showSuccess('Credentials request submitted! Check your email after some time.');
-        // no manual loading/detectChanges here — finalize() handles it
-      },
-      error: (err) => {
-        this.submitted = false;
-        const msg = this.extractFirstErrorMessage(err) || 'Request failed. Please try again.';
-        this.showError(msg);
-        // no manual loading/detectChanges here — finalize() handles it
-      },
-    });
-}
   private extractFirstErrorMessage(err: any): string | null {
     let e = err?.error;
     if (!e) return err?.message ?? null;
 
-    // Some backends wrap validation details under `errors`.
     if (e?.errors && typeof e.errors === 'object') {
       e = e.errors;
     }
 
-    // Direct string or detail
     if (typeof e === 'string') return e;
     if (e?.detail && typeof e.detail === 'string') return e.detail;
 
-    // Common field checks in preferred order
     const preferredFields = ['email', 'phone', 'desired_position', 'non_field_errors', 'detail', 'message'];
     for (const field of preferredFields) {
       const val = (e as any)[field];
@@ -159,10 +155,8 @@ export class RequestCredentials implements OnInit {
       if (typeof val === 'string' && val) return val;
     }
 
-    // If backend returned an array of messages
     if (Array.isArray(e) && e.length) return typeof e[0] === 'string' ? e[0] : JSON.stringify(e[0]);
 
-    // Generic object traversal: return the first string found
     if (typeof e === 'object') {
       for (const key of Object.keys(e)) {
         const val = (e as any)[key];

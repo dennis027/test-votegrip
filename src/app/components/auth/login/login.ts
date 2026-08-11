@@ -1,15 +1,28 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../services/auth/auth';
 import { finalize } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { AuthService } from '../../../services/auth/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatSnackBarModule,
+  ],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
@@ -21,15 +34,11 @@ export class Login implements OnInit {
   submitted    = false;
   loginError   = '';
 
-  emailFocused    = false;
-  passwordFocused = false;
-
   private snackBar = inject(MatSnackBar);
   private cdr      = inject(ChangeDetectorRef);
-  private route = inject(Router);
+  private route    = inject(Router);
   private authService = inject(AuthService);
-
-  constructor(private fb: FormBuilder) {}
+  private fb       = inject(FormBuilder);
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -65,10 +74,13 @@ export class Login implements OnInit {
   }
 
   onSubmit(): void {
-    this.submitted   = true;
-    this.loginError  = '';
+    this.submitted  = true;
+    this.loginError = '';
 
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
 
     this.isLoading = true;
 
@@ -85,16 +97,12 @@ export class Login implements OnInit {
     )
     .subscribe({
       next: (res) => {
-        
-        // Check if device is verified (known device)
         if (res.data.verified) {
           const role = res.data.user.role.name;
           const dashboardRoute = role === 'admin' ? 'admin-menu/admin-dashboard' : 'main-menu/dashboard';
-          this.route.navigate([dashboardRoute]).then(success => {
-          });
+          this.route.navigate([dashboardRoute]);
           this.showSuccess('Login successful! Welcome to the dashboard.');
         } else {
-          // New device detected - requires 2FA
           this.route.navigate(['/two-factor-auth']);
           this.showSuccess('New device detected. Please enter the 2FA code sent to your email.');
         }
