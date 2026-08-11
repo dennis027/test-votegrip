@@ -229,6 +229,7 @@ export class AssignPollingStation {
         console.error('Error fetching logged-in user:', err);
         this.profileLoaded = true;
         this.cdr.markForCheck();
+        if (err.status === 401) this.router.navigate(['login']);
       }
     });
   }
